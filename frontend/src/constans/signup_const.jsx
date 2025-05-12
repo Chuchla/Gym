@@ -18,7 +18,7 @@ export const signup = [
     placeholder: "Last name",
   },
   {
-    id: "phone",
+    id: "phone_number",
     title: "Phone number:",
     type: "tel",
     placeholder: "Phone",

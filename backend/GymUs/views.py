@@ -1,12 +1,18 @@
+import jwt
+from django.core.serializers import serialize
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from GymDB import settings
 from .models import Client, Employee
-from .serializers import ClientSerializer
+from .serializers import ClientSerializer, ClientLoginSerializer, ClientRegistrationSerializer
 from django.contrib.auth.hashers import check_password, make_password
+from rest_framework.authtoken.models import Token
 from .models import Event
 from .serializers import EventSerializer
+
 
 class ClientView(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
@@ -23,6 +29,7 @@ def register_client(request):
         return Response({"message": "Użytkownik zarejestrowany!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 def login_client(request):
     login = request.data.get('login')
@@ -37,11 +44,51 @@ def login_client(request):
     except Client.DoesNotExist:
         return Response({'error': 'Użytkownik nie istnieje'}, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['POST'])
+def login_view(request):
+    serializer = ClientLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    client = serializer.validated_data['client']
+
+    payload = {
+        "client_id": client.id,
+        "email": client.email,
+    }
+    # Upewnij się, że importujesz PyJWT: `import jwt`
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+    return Response({"token": token}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def register_view(request):
+    serializer = ClientRegistrationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    client = serializer.save()
+
+    # generujemy prosty JWT
+    payload = {'client_id': client.id, 'email': client.email}
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+    return Response({
+        'client': {
+            'id': client.id,
+            'first_name': client.first_name,
+            'last_name': client.last_name,
+            'email': client.email,
+            'phone_number': client.phone_number,
+        },
+        'token': token,
+    }, status=status.HTTP_201_CREATED)
+
+
 @api_view(['GET'])
 def get_events(request):
     events = Event.objects.all()
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
+
 
 # views.py
 @api_view(['POST'])
@@ -56,6 +103,7 @@ def login_employee(request):
     except Employee.DoesNotExist:
         return Response({'error': 'Nieprawidłowy login'}, status=401)
 
+
 @api_view(['GET'])
 def get_trainer_classes(request):
     employee_id = request.headers.get('Employee-ID')
@@ -65,5 +113,3 @@ def get_trainer_classes(request):
     events = Event.objects.filter(employee__id=employee_id)
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
-
-

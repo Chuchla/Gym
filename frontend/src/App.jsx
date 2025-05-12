@@ -7,8 +7,23 @@ import TrainerClasses from "./components/Trainer/TrainerClasses.jsx";
 import ButtonGradient from "./assets/svg/ButtonGradient.jsx";
 import Memberships from "./components/Memberships.jsx";
 import { SignUp } from "./components/SignUp.jsx";
+import Login from "./components/Login.jsx";
+import { useState } from "react";
 
 const App = () => {
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!token);
+  const handleLogin = (newToken) => {
+    console.log("New token:", newToken);
+    localStorage.setItem("token", newToken);
+    setToken(newToken);
+    setIsLoggedIn(true);
+  };
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setIsLoggedIn(false);
+  };
   return (
     <>
       <Header />
@@ -26,6 +41,7 @@ const App = () => {
           />
           <Route path="/trainer/myclasses" element={<TrainerClasses />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path={"/login"} element={<Login />} />
         </Routes>
       </div>
       <ButtonGradient />
