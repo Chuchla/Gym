@@ -1,3 +1,4 @@
+import gymUsLogo from "./GymUsLogo.png";
 import brainwave from "./brainwave.svg";
 import check from "./check.svg";
 import brainwaveSymbol from "./brainwave-symbol.svg";
@@ -76,6 +77,7 @@ import telegram from "./socials/telegram.svg";
 import twitter from "./socials/twitter.svg";
 
 export {
+  gymUsLogo,
   brainwave,
   check,
   check2,

@@ -6,6 +6,7 @@ import Benefits from "./components/Benefits.jsx";
 import TrainerClasses from "./components/Trainer/TrainerClasses.jsx";
 import ButtonGradient from "./assets/svg/ButtonGradient.jsx";
 import Memberships from "./components/Memberships.jsx";
+import { SignUp } from "./components/SignUp.jsx";
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
             }
           />
           <Route path="/trainer/myclasses" element={<TrainerClasses />} />
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
       </div>
       <ButtonGradient />
