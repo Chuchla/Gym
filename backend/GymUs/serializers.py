@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework import serializers
-from .models import Client, Event
+from .models import Client, Event, Employee
 
 User = get_user_model()
 
@@ -10,7 +10,6 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'password']
-
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:

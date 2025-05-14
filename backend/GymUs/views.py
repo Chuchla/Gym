@@ -47,18 +47,54 @@ def login_client(request):
 
 @api_view(['POST'])
 def login_view(request):
-    serializer = ClientLoginSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    client = serializer.validated_data['client']
+    email = request.data.get('email')
+    password = request.data.get('password')
 
-    payload = {
-        "client_id": client.id,
-        "email": client.email,
-    }
-    # Upewnij się, że importujesz PyJWT: `import jwt`
-    token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+    if not email or not password:
+        return Response({'error': 'Brakuje adresu e-mail lub hasła.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({"token": token}, status=status.HTTP_200_OK)
+    # 🔍 Spróbuj najpierw klienta
+    try:
+        client = Client.objects.get(email=email)
+        if check_password(password, client.password):
+            payload = {'user_id': client.id, 'email': client.email, 'role': 'client'}
+            token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+            return Response({
+                'token': token,
+                'role': 'client',
+                'user': {
+                    'id': client.id,
+                    'first_name': client.first_name,
+                    'last_name': client.last_name,
+                    'email': client.email,
+                }
+            }, status=200)
+        else:
+            return Response({'error': 'Nieprawidłowe hasło.'}, status=401)
+    except Client.DoesNotExist:
+        pass
+
+    # 🔍 Jeśli nie klient, spróbuj pracownika
+    try:
+        employee = Employee.objects.get(email=email)
+        if check_password(password, employee.password):
+            payload = {'user_id': employee.id, 'email': employee.email, 'role': 'employee'}
+            token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+            return Response({
+                'token': token,
+                'role': 'employee',
+                'user': {
+                    'id': employee.id,
+                    'first_name': employee.first_name,
+                    'last_name': employee.last_name,
+                    'email': employee.email,
+                }
+            }, status=200)
+        else:
+            return Response({'error': 'Nieprawidłowe hasło.'}, status=401)
+    except Employee.DoesNotExist:
+        return Response({'error': 'Użytkownik nie istnieje.'}, status=404)
+
 
 
 @api_view(['POST'])
@@ -88,20 +124,6 @@ def get_events(request):
     events = Event.objects.all()
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
-
-
-# views.py
-@api_view(['POST'])
-def login_employee(request):
-    email = request.data.get('email')
-    password = request.data.get('password')
-
-    try:
-        employee = Employee.objects.get(email=email)
-        # Jeśli nie trzymasz hasła, pominij check_password
-        return Response({'message': 'Zalogowano', 'employee_id': employee.id}, status=200)
-    except Employee.DoesNotExist:
-        return Response({'error': 'Nieprawidłowy login'}, status=401)
 
 
 @api_view(['GET'])
