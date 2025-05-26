@@ -8,7 +8,9 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 
@@ -95,11 +97,27 @@ def register_view(request):
     }, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
-def get_events(request):
-    events = Event.objects.all()
-    serializer = EventSerializer(events, many=True)
-    return Response(serializer.data)
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def events_view(request):
+    user = request.user
+
+    if request.method == 'GET':
+        if user.role != 'trainer':
+            return Response({'error': 'Tylko trenerzy mają dostęp.'}, status=403)
+        events = Event.objects.filter(trainer=user)
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        if user.role != 'trainer':
+            return Response({'error': 'Tylko trenerzy mogą dodawać wydarzenia.'}, status=403)
+        serializer = EventSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 # views.py
@@ -117,11 +135,14 @@ def login_employee(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_trainer_classes(request):
-    employee_id = request.headers.get('Employee-ID')
-    if not employee_id:
-        return Response({'error': 'Brak identyfikatora trenera'}, status=400)
+    user = request.user
 
-    events = Event.objects.filter(employee__id=employee_id)
+    if not hasattr(user, 'role') or user.role != 'trainer':
+        return Response({'error': 'Brak dostępu — tylko trenerzy mają dostęp do tej listy.'}, status=403)
+
+    events = Event.objects.filter(employee__email=user.email)
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
+

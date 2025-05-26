@@ -17,7 +17,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        # To wywołuje Models.ClientUserManager.create_user
         user = User.objects.create_user(**validated_data)
         return user
 
@@ -29,9 +28,33 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    client_ids = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
+
     class Meta:
         model = Event
-        fields = ['event_id', 'event_type', 'date', 'trainer']
+        fields = [
+            'id', 'name', 'description', 'date', 'time',
+            'capacity', 'place', 'is_personal_training',
+            'trainer', 'client_ids'
+        ]
+        read_only_fields = ['trainer']
+
+    def create(self, validated_data):
+        client_ids = validated_data.pop('client_ids', [])
+        trainer = self.context['request'].user
+        event = Event.objects.create(trainer=trainer, **validated_data)
+
+        for client_id in client_ids:
+            try:
+                client = Client.objects.get(id=client_id)
+                Reservation.objects.create(client=client, event=event, date=event.date)
+            except Client.DoesNotExist:
+                continue
+
+        return event
+
 
 
 class ClientLoginSerializer(serializers.Serializer):

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
-
+from django.conf import settings
 
 class ClientUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -85,17 +85,25 @@ class Membership(models.Model):
         return f"Membership {self.type} ({self.status})"
 
 
+
+
 class Event(models.Model):
     date = models.DateField()
     time = models.TimeField()
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     capacity = models.IntegerField()
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='events')
+    trainer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='trainer_events',
+        limit_choices_to={'role': 'trainer'}
+    )
     place = models.CharField(max_length=255)
-
+    is_personal_training = models.BooleanField(default=False)
     def __str__(self):
         return self.name
+
 
 
 class Reservation(models.Model):

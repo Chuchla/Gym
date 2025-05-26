@@ -1,0 +1,83 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  color: white;
+}
+
+.modal input,
+.modal select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 4px;
+}
+
+.modal-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+.modal-checkbox {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.modal select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 4px;
+}
+.search-results {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0;
+  background: #222;
+  border: 1px solid #444;
+  max-height: 120px;
+  overflow-y: auto;
+  border-radius: 4px;
+}
+
+.search-results li {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #333;
+}
+
+.search-results li:hover {
+  background: #444;
+}
+
+.selected-clients span {
+  display: inline-block;
+  margin: 3px;
+  padding: 4px 8px;
+  background: #007bff;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.85em;
+}
