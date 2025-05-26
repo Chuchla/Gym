@@ -1,17 +1,27 @@
 import jwt
-from django.core.serializers import serialize
-from rest_framework import viewsets
-from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
 from GymDB import settings
-from .models import Client, Employee
-from .serializers import ClientSerializer, ClientLoginSerializer, ClientRegistrationSerializer
-from django.contrib.auth.hashers import check_password, make_password
-from rest_framework.authtoken.models import Token
-from .models import Event
-from .serializers import EventSerializer
+from rest_framework import viewsets, permissions, status
+from .serializers import *
+from .models import *
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+class RegisterViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ClientView(viewsets.ModelViewSet):

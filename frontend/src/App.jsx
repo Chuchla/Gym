@@ -9,6 +9,7 @@ import Memberships from "./components/Memberships.jsx";
 import { SignUp } from "./components/SignUp.jsx";
 import Login from "./components/Login.jsx";
 import { useState } from "react";
+import Classes from "./components/Classes.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -42,6 +43,7 @@ const App = () => {
           <Route path="/trainer/myclasses" element={<TrainerClasses />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path={"/login"} element={<Login />} />
+          <Route path={"/classes"} element={<Classes />} />
         </Routes>
       </div>
       <ButtonGradient />

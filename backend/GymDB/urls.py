@@ -19,10 +19,11 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from GymUs.views import (ClientView)
+from GymUs.views import (RegisterViewSet)
 
 router = routers.DefaultRouter()
-router.register(r'Client', ClientView)
+router.register('register', RegisterViewSet)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),

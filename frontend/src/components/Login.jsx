@@ -79,7 +79,7 @@ const Login = ({ onLogin }) => {
           ))}
           <Button
             white={!isFormComplete}
-            className={"w-full"}
+            className={"w-full "}
             onClick={handleLogin}
           >
             {isFormComplete ? "Login!" : "Fill your credentials"}
