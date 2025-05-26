@@ -9,6 +9,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 class RegisterViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
