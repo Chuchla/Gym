@@ -1,22 +1,57 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
 
 
-class Client(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+class ClientUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Users must have an email address')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', 'admin')
+        return self.create_user(email, password, **extra_fields)
+
+
+class Client(AbstractUser):
+    ROLE_CHOICES = [
+        ('client', 'Client'),
+        ('trainer', 'Trainer'),
+        ('admin', 'Admin'),
+    ]
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
+    username = models.CharField(max_length=200, null=True, blank=True)
+
+    objects = ClientUserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name", "phone_number"]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} <{self.email}>"
+
+    def save(self, *args, **kwargs):
+        if self.role in ['trainer', 'admin']:
+            self.is_staff = True
+        else:
+            self.is_staff = False
+        super().save(*args, **kwargs)
 
 
 class Employee(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

@@ -1,125 +1,108 @@
-import React, { useEffect, useState } from "react";
+// / components / SignUp.jsx;
+import React, { useState } from "react";
 import Section from "./Section.jsx";
 import Heading from "./Heading.jsx";
 import { signup } from "../constans/signup_const.jsx";
 import Button from "./Button.jsx";
-import { heroBackground } from "../assets/index.js";
+import { useForm } from "react-hook-form";
+import TextField from "./forms/TextField.jsx";
+import AxiosInstance from "./AxiosInstance.jsx"; // <- Twój AxiosInstance
 
 export const SignUp = () => {
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "", // <-- tu klucz zgodny z signup_const
-    password: "",
-    repeat_password: "",
-  });
-  const [isFormComplete, setIsFormComplete] = useState(false);
-  const [error, setError] = useState("");
+  const {
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm();
 
-  useEffect(() => {
-    const allFilled = Object.values(formData).every((v) => v.trim() !== "");
-    setIsFormComplete(allFilled);
-  }, [formData]);
+  const allValues = watch();
+  const isFormComplete = Object.values(allValues).every(
+    (v) => v?.trim() !== "",
+  );
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    const { first_name, last_name, email, phone, password, repeat_password } =
-      formData;
-
-    // client-side walidacja
-    if (password !== repeat_password) {
-      setError("Hasła muszą być takie same");
-      return;
+  const onSubmit = async (data) => {
+    // walidacja powtórzenia hasła
+    if (data.password !== data.repeat_password) {
+      return alert("Hasła muszą być takie same");
     }
 
-    // budujemy payload zgodny z serializerem:
-    const payload = {
-      first_name,
-      last_name,
-      email,
-      password,
-      repeat_password,
-      phone_number: phone, // backend oczekuje pola phone_number
-    };
+    setLoading(true);
+    setApiError(null);
 
     try {
-      console.log("Wysyłam payload:", payload);
-      const res = await fetch("http://localhost:8000/api/register/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      // POST /api/register/ (u Ciebie może być inna ścieżka)
+      const response = await AxiosInstance.post("register/", {
+        email: data.email,
+        password: data.password,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone_number: data.phone_number,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        // wyświetlamy komunikaty zwrócone przez DRF
-        setError(
-          typeof data === "object"
-            ? Object.values(data).flat().join(" ")
-            : "Nieznany błąd",
-        );
-        return;
-      }
-
-      console.log("Token after registration: ", data.token);
-      // TODO: przekierowanie lub wywołanie onLogin(data.token)
+      // zakładamy, że API zwraca utworzonego usera
+      console.log("Rejestracja udana:", response.data);
+      alert("Konto utworzone pomyślnie!");
+      // tutaj możesz:
+      // - przekierować użytkownika: np. history.push("/login")
+      // - zapisać token w localStorage, jeśli go zwracasz
+      // localStorage.setItem("accessToken", response.data.token);
     } catch (err) {
-      console.error(err);
-      setError("Wystąpił błąd podczas rejestracji");
+      console.error("Błąd rejestracji:", err.response || err);
+      // jeśli DRF zwraca błędy walidacji, będą w err.response.data
+      if (err.response && err.response.data) {
+        setApiError(JSON.stringify(err.response.data));
+      } else {
+        setApiError("Coś poszło nie tak. Spróbuj ponownie.");
+      }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const onError = (formErrors) => {
+    console.log("Błędy walidacji:", formErrors);
   };
 
   return (
-    <Section id={"#signup"}>
-      <Heading
-        className={"container relative z-2"}
-        title={"Create new account"}
-      />
+    <Section id="#signup">
+      <Heading title="Create new account" />
 
-      <div className="flex justify-center mt-8">
-        <div className="rounded-md bg-n-7 p-4 border-color-1 border-2 w-full max-w-md space-y-4">
-          <form onSubmit={handleRegister} className="space-y-4">
-            {signup.map((field) => (
-              <div key={field.id} className="flex flex-col">
-                <label htmlFor={field.id} className="text-white text-md mb-1">
-                  {field.title}
-                </label>
-                <input
-                  id={field.id}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  value={formData[field.id] || ""}
-                  onChange={handleChange}
-                  className="bg-n-1 w-full rounded-md px-2 py-1 text-black"
-                />
-              </div>
-            ))}
+      <form
+        onSubmit={handleSubmit(onSubmit, onError)}
+        className="mx-auto max-w-md space-y-4 p-4 bg-n-7 rounded-md"
+      >
+        {signup.map((field) => (
+          <TextField
+            key={field.id}
+            name={field.name}
+            id={field.id}
+            control={control}
+            constant={field}
+            rules={{ required: `${field.title} jest wymagane` }}
+          />
+        ))}
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+        {apiError && <div className="text-red-400 text-sm">{apiError}</div>}
 
-            <Button
-              type="submit"
-              white={!isFormComplete}
-              className="w-full"
-              disabled={!isFormComplete}
-            >
-              {isFormComplete ? "Create account!" : "Fill all of the fields"}
-            </Button>
-          </form>
-        </div>
-      </div>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={!isFormComplete || loading}
+          white={!isFormComplete || loading}
+        >
+          {loading
+            ? "Rejestracja..."
+            : isFormComplete
+              ? "Create account!"
+              : "Fill all of the fields"}
+        </Button>
+      </form>
     </Section>
   );
 };
+
+export default SignUp;

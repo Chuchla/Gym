@@ -1,9 +1,25 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework import serializers
-from .models import Client, Event
+from .models import *
 
 User = get_user_model()
+
+
+# Meta chce wiedziec do jakiego modelu bedzie odnosic sie te serializer
+# W tym przypadku jest to oczywiscie Client (moze kiedys User jak zmienimy nazwe tabeli)
+# User bo User = get_user_model i tak bierze sobie Client - z Settings da sie to wyczytac
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'password', 'first_name', 'last_name', 'phone_number')
+        # Nie chcemy pokazywac naszego hasła przy getach dlatego tylko write_only. Po prostu nie zwracamy
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        # To wywołuje Models.ClientUserManager.create_user
+        user = User.objects.create_user(**validated_data)
+        return user
 
 
 class ClientSerializer(serializers.ModelSerializer):

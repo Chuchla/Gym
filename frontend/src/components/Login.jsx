@@ -1,92 +1,108 @@
 import React, { useEffect, useState } from "react";
 import Section from "./Section.jsx";
-import Header from "./Header.jsx";
 import Heading from "./Heading.jsx";
-import { signup } from "../constans/signup_const.jsx";
 import Button from "./Button.jsx";
-import { login } from "../constans/login_const.jsx";
+import { login as loginFields } from "../constans/login_const.jsx";
+import AxiosInstance from "./AxiosInstance.jsx";
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({});
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const allFields = login.every((field) => formData[field.id]?.trim());
-    setIsFormComplete(allFields);
+    const allFilled = loginFields.every(
+      ({ id }) => formData[id]?.trim() !== "",
+    );
+    setIsFormComplete(allFilled);
   }, [formData]);
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [id]: value,
+      [e.target.id]: e.target.value,
     }));
   };
 
   const handleLogin = async (e) => {
+    console.log("PRÓBUJE LOGOWAC!!!!");
     e.preventDefault();
+    setError("");
+    if (!isFormComplete) return;
+
     const email = formData.email?.trim() || "";
     const password = formData.password?.trim() || "";
-    if (!email || !password) {
-      setError("No credentials!");
-      return;
-    }
+
+    // **DEBUG**: wypisz payload przed wysłaniem
+    console.log("📤 WYSYŁAM LOGIN PAYLOAD:", { email, password });
+
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const res = await AxiosInstance.post("token/", {
+        email,
+        password,
       });
-      const data = await res.json();
-      console.log("Login response: ", data);
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        console.log("Token zapisany: ", localStorage.getItem("token"));
-        onLogin(data.token);
-      } else {
-        setError("Incorrect credentials");
-      }
+      const { access, refresh } = res.data;
+
+      // zapisujemy tokeny
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
+
+      // **LOG**: informacja o sukcesie i token
+      console.log("✅ ZALOGOWANO POMYŚLNIE! Access token:", access);
+
+      if (onLogin) onLogin(access);
     } catch (err) {
-      setError("Wystąpił błąd podczas logowania");
+      console.error("Login error:", err.response || err);
+      if (err.response?.status === 401) {
+        setError("Nieprawidłowy email lub hasło");
+      } else {
+        setError("Błąd serwera. Spróbuj ponownie później.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Section id={"/login"}>
-      <Heading className={"container relative z-2"} title={"Login"} />
-      <div
-        className={"flex flex-col  items-center  mt-8 space-y-6 justify-center"}
-      >
-        <div
-          className={
-            "rounded-md bg-n-7 p-4 border-color-1 border-2 w-full max-w-md space-y-4"
-          }
+    <Section id="/login">
+      <Heading title="Login" />
+      <form className="mx-auto max-w-md space-y-4 p-4 bg-n-7 rounded-md">
+        {loginFields.map(({ id, title, type, placeholder }) => (
+          <div key={id} className="flex flex-col">
+            <label htmlFor={id} className="text-white mb-1">
+              {title}
+            </label>
+            <input
+              id={id}
+              type={type}
+              placeholder={placeholder}
+              value={formData[id] || ""}
+              onChange={handleChange}
+              className="bg-n-1 w-full rounded-md px-2 py-1 text-black"
+            />
+          </div>
+        ))}
+
+        {error && <div className="text-red-400 text-sm">{error}</div>}
+
+        <Button
+          type="submit"
+          className="w-full"
+          onClick={handleLogin}
+          disabled={!isFormComplete || loading}
+          white={!isFormComplete || loading}
         >
-          {login.map((form) => (
-            <div key={form.id} className={"flex flex-col"}>
-              <label className={"text-white text-md mb-1"} htmlFor={form.id}>
-                {form.title}
-              </label>
-              <input
-                id={form.id}
-                type={form.type}
-                placeholder={form.placeholder}
-                value={formData[form.id] || ""}
-                onChange={handleChange}
-                className="bg-n-1 w-full rounded-md px-2 py-1 text-black"
-              />
-            </div>
-          ))}
-          <Button
-            white={!isFormComplete}
-            className={"w-full"}
-            onClick={handleLogin}
-          >
-            {isFormComplete ? "Login!" : "Fill your credentials"}
-          </Button>
-        </div>
-      </div>
+          {loading
+            ? "Ładowanie..."
+            : isFormComplete
+              ? "Login!"
+              : "Wypełnij wszystkie pola"}
+        </Button>
+      </form>
     </Section>
   );
 };
+
 export default Login;
