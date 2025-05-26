@@ -119,8 +119,6 @@ def events_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-# views.py
 @api_view(['POST'])
 def login_employee(request):
     email = request.data.get('email')
@@ -128,10 +126,19 @@ def login_employee(request):
 
     try:
         employee = Employee.objects.get(email=email)
-        # Jeśli nie trzymasz hasła, pominij check_password
         return Response({'message': 'Zalogowano', 'employee_id': employee.id}, status=200)
     except Employee.DoesNotExist:
         return Response({'error': 'Nieprawidłowy login'}, status=401)
+
+
+@api_view(['POST'])
+def create_article(request):
+    user = request.user
+    serializer = ArticleSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(created_by=user)
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
 
 
 @api_view(['GET'])

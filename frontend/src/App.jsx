@@ -3,7 +3,7 @@ import "./App.css";
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
 import Benefits from "./components/Benefits.jsx";
-import TrainerClasses from "./components/Trainer/TrainerClasses.jsx";
+import TrainerPanel from "./components/Trainer/TrainerPanel.jsx";
 import ButtonGradient from "./assets/svg/ButtonGradient.jsx";
 import Memberships from "./components/Memberships.jsx";
 import { SignUp } from "./components/SignUp.jsx";
@@ -40,7 +40,7 @@ const App = () => {
               </>
             }
           />
-          <Route path="/trainer/myclasses" element={<TrainerClasses />} />
+          <Route path="/trainer/trainerPanel" element={<TrainerPanel />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path={"/login"} element={<Login />} />
           <Route path={"/classes"} element={<Classes />} />

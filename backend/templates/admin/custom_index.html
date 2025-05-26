@@ -1,0 +1,71 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+  <style>
+    .quick-actions {
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+    }
+
+    .quick-actions h3 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+      color: #333;
+    }
+
+    .quick-actions ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 10px;
+    }
+
+    .quick-actions li {
+      margin-bottom: 8px;
+    }
+
+    .quick-actions a {
+      text-decoration: none;
+      color: #0073aa;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .quick-actions a:hover {
+      color: #00557a;
+    }
+
+    .quick-actions .count {
+      background-color: #0073aa;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-left: 6px;
+    }
+  </style>
+
+  <div class="quick-actions">
+    <h3>Szybkie akcje</h3>
+    <ul>
+      <li>
+        <a href="/admin/GymUs/article/?is_approved__exact=0">
+          Artykuły do zatwierdzenia
+          <span class="count">{{ unapproved_articles }}</span>
+        </a>
+      </li>
+      <li>
+        <a href="/admin/GymUs/membership/?status__exact=pending">
+          Karnety oczekujące
+          <span class="count">{{ pending_memberships }}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  {{ block.super }}
+{% endblock %}

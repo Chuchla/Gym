@@ -77,6 +77,12 @@ class ClientLoginSerializer(serializers.Serializer):
         return attrs
 
 
+class ArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ['title', 'content']
+
+
 class ClientRegistrationSerializer(serializers.ModelSerializer):
     repeat_password = serializers.CharField(write_only=True)
 

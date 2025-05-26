@@ -57,6 +57,19 @@ class Employee(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+class Article(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    visible_from = models.DateTimeField(null=True, blank=True)
+    visible_to = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -66,7 +79,7 @@ class Product(models.Model):
         return self.name
 
 
-class Activity(models.Model):
+class Activities(models.Model):
     date = models.DateField()
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='activities')
 

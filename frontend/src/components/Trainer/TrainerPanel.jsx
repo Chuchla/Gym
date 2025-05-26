@@ -7,6 +7,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import "../trainer-styles/TrainerClasses.css";
 import EventModal from "./EventModal";
 import PersonalTrainingModal from "./PersonalTrainingModal";
+import ArticleModal from "./ArticleModal";
 
 const API_URL = "http://localhost:8000";
 
@@ -14,6 +15,7 @@ const TrainerClasses = () => {
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showPersonalModal, setShowPersonalModal] = useState(false);
+  const [showArticleModal, setShowArticleModal] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -48,7 +50,10 @@ const TrainerClasses = () => {
             Dodaj wydarzenie
           </button>
           <button onClick={() => setShowPersonalModal(true)} className="add-event-btn">
-            Umów trening personalny
+            Dodaj trening personalny
+          </button>
+          <button onClick={() => setShowArticleModal(true)} className="add-event-btn">
+            Dodaj artykuł
           </button>
         </div>
       </div>
@@ -66,6 +71,7 @@ const TrainerClasses = () => {
 
       <EventModal isOpen={showEventModal} onClose={() => setShowEventModal(false)} />
       <PersonalTrainingModal isOpen={showPersonalModal} onClose={() => setShowPersonalModal(false)} />
+      <ArticleModal isOpen={showArticleModal} onClose={() => setShowArticleModal(false)} />
     </div>
   );
 };
