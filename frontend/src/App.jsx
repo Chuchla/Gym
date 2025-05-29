@@ -10,6 +10,7 @@ import { SignUp } from "./components/SignUp.jsx";
 import Login from "./components/Login.jsx";
 import { useState } from "react";
 import Classes from "./components/Classes.jsx";
+import Articles from "./components/Articles.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -44,6 +45,7 @@ const App = () => {
           <Route path="/signup" element={<SignUp />} />
           <Route path={"/login"} element={<Login />} />
           <Route path={"/classes"} element={<Classes />} />
+          <Route path={"/articles"} element={<Articles />} />
         </Routes>
       </div>
       <ButtonGradient />

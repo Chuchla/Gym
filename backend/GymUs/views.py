@@ -28,6 +28,22 @@ class RegisterViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ArticlesViewSet(viewsets.ModelViewSet):
+    """
+        GET    /api/articles/         → lista
+        GET    /api/articles/{pk}/    → detail
+        POST   /api/articles/         → create
+        PUT    /api/articles/{pk}/    → update
+        DELETE /api/articles/{pk}/    → destroy
+    """
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
 class ClientView(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
@@ -152,4 +168,3 @@ def get_trainer_classes(request):
     events = Event.objects.filter(employee__email=user.email)
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
-

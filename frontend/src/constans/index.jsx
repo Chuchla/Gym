@@ -60,7 +60,7 @@ export const navigation = [
   {
     id: "4",
     title: "Articles",
-    url: "#articles",
+    url: "/articles",
   },
   {
     id: "5",

@@ -56,7 +56,6 @@ class EventSerializer(serializers.ModelSerializer):
         return event
 
 
-
 class ClientLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -78,9 +77,19 @@ class ClientLoginSerializer(serializers.Serializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
+    created_by = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+
     class Meta:
         model = Article
-        fields = ['title', 'content']
+        fields = ['id', 'title', 'content', 'created_by', 'created_at', 'is_approved', 'visible_from', 'visible_to', ]
+        read_only_fields = ['is_approved', 'visible_from', 'visible_to']
+
+    def get_created_by(self, obj):
+        return f'{obj.created_by.first_name} {obj.created_by.last_name}'
+
+    def get_created_at(self, obj):
+        return obj.created_at.strftime('%Y-%m-%d')
 
 
 class ClientRegistrationSerializer(serializers.ModelSerializer):
