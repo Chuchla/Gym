@@ -73,12 +73,12 @@ const CalendarOfEvents = () => {
           <div className="rounded-2xl bg-n-8 overflow-hidden">
             <div className="border-n-8 rounded-xl">
               {/* nagłówki dni */}
-              <div className="grid grid-cols-8 border-color-1 text-base text-center font-serif">
+              <div className="grid grid-cols-8 grid-rows-[auto_repeat(16, _minmax(1rem,_0.75fr))] border-color-1 text-base text-center font-serif">
                 <div className="border-r-2 border-b-2 bg-n-9"></div>
                 {days.map((day) => (
                   <div
                     key={day}
-                    className="border-r-2 border-b-2 py-3 bg-n-9 font-medium"
+                    className="border-r-2 border-b-2 py-3 bg-n-9 font-medium text-center"
                   >
                     <div className="text-lg">{format(day, "EEE")}</div>
                     <div className="text-sm text-purple-300">
@@ -92,7 +92,7 @@ const CalendarOfEvents = () => {
                 {HOURS.map((h) => (
                   <React.Fragment key={h}>
                     {/* etykieta godziny */}
-                    <div className="h-20 border-r-2 border-b-2 px-2 text-sm text-right pr-3 bg-n-9 font-mono">
+                    <div className="border-r-2 border-b-2 px-2 text-sm text-right pr-3 bg-n-9 font-mono">
                       {`${h}:00`}
                     </div>
                     {/* komórki dnia */}
@@ -103,19 +103,21 @@ const CalendarOfEvents = () => {
                       return (
                         <div
                           key={`${day}-${h}`}
-                          className="h-20 border-r-2 border-b-2 relative hover:bg-n-7 cursor-pointer"
+                          className="border-r-2 border-b-2 relative hover:bg-n-7 cursor-pointer"
                           onClick={() => console.log("Kliknięto:", day, h)}
                         >
                           {dayEvents.map((ev) => (
                             <div
                               key={ev.id}
-                              className="absolute inset-x-1 inset-y-0 bg-purple-600 text-white text-xs rounded"
+                              className="absolute inset-0.5 bg-purple-600 text-white text-xs rounded-2xl flex justify-center items-center text-center px-1"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 console.log("Event clicked:", ev);
                               }}
                             >
-                              {ev.name}
+                              <span className={"justify-center  "}>
+                                {ev.name}
+                              </span>
                             </div>
                           ))}
                         </div>
