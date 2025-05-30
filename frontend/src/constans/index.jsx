@@ -55,12 +55,12 @@ export const navigation = [
   {
     id: "3",
     title: "Calendar",
-    url: "#calendar",
+    url: "/calendar",
   },
   {
     id: "4",
     title: "Articles",
-    url: "#articles",
+    url: "/articles",
   },
   {
     id: "5",

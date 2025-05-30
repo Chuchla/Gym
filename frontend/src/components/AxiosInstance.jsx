@@ -16,7 +16,13 @@ const AxiosInstance = axios.create({
 AxiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
+    if (
+      token &&
+      !config.url.includes("register") &&
+      !config.url.includes("login") &&
+      !config.url.includes("articles") &&
+      !config.url.includes("events")
+    ) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

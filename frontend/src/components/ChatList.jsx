@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import styles from '../design/ChatList.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import styles from "../design/ChatList.css";
 
-function ChatList() {
+function sChatList() {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/chats/')
-      .then(response => {
+    axios
+      .get("/api/chats/")
+      .then((response) => {
         setUsers(response.data);
       })
-      .catch(error => {
-        console.error('Error fetching users', error);
+      .catch((error) => {
+        console.error("Error fetching users", error);
       });
   }, []);
 
@@ -20,7 +21,7 @@ function ChatList() {
     <div className={styles.container}>
       <h1 className={styles.title}>Chat with users</h1>
       <ul className={styles.userList}>
-        {users.map(user => (
+        {users.map((user) => (
           <li key={user.id} className={styles.userItem}>
             <Link to={`/chats/${user.id}`} className={styles.userLink}>
               {user.username}

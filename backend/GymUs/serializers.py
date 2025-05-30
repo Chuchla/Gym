@@ -28,8 +28,11 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    client_ids = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False
+    trainer_name = serializers.ReadOnlyField(source='trainer.username')
+    client_ids = serializers.PrimaryKeyRelatedField(
+        source='reservation_set',
+        read_only=True,
+        many=True
     )
 
     class Meta:
@@ -37,9 +40,9 @@ class EventSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'date', 'time',
             'capacity', 'place', 'is_personal_training',
-            'trainer', 'client_ids'
+            'trainer', 'trainer_name', 'client_ids'
         ]
-        read_only_fields = ['trainer']
+        read_only_fields = ['trainer', 'trainer_name', 'client_ids']
 
     def create(self, validated_data):
         client_ids = validated_data.pop('client_ids', [])
@@ -54,7 +57,6 @@ class EventSerializer(serializers.ModelSerializer):
                 continue
 
         return event
-
 
 
 class ClientLoginSerializer(serializers.Serializer):
@@ -78,9 +80,19 @@ class ClientLoginSerializer(serializers.Serializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
+    created_by = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+
     class Meta:
         model = Article
-        fields = ['title', 'content']
+        fields = ['id', 'title', 'content', 'created_by', 'created_at', 'is_approved', 'visible_from', 'visible_to', ]
+        read_only_fields = ['is_approved', 'visible_from', 'visible_to']
+
+    def get_created_by(self, obj):
+        return f'{obj.created_by.first_name} {obj.created_by.last_name}'
+
+    def get_created_at(self, obj):
+        return obj.created_at.strftime('%Y-%m-%d')
 
 
 class ClientRegistrationSerializer(serializers.ModelSerializer):

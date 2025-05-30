@@ -23,7 +23,7 @@ export const SignUp = () => {
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
-
+  const [alertSuccess, setAlertSuccess] = useState(null);
   const onSubmit = async (data) => {
     // walidacja powtórzenia hasła
     if (data.password !== data.repeat_password) {
@@ -35,6 +35,7 @@ export const SignUp = () => {
 
     try {
       // POST /api/register/ (u Ciebie może być inna ścieżka)
+
       const response = await AxiosInstance.post("register/", {
         email: data.email,
         password: data.password,
@@ -45,18 +46,17 @@ export const SignUp = () => {
 
       // zakładamy, że API zwraca utworzonego usera
       console.log("Rejestracja udana:", response.data);
-      alert("Konto utworzone pomyślnie!");
-      // tutaj możesz:
-      // - przekierować użytkownika: np. history.push("/login")
-      // - zapisać token w localStorage, jeśli go zwracasz
-      // localStorage.setItem("accessToken", response.data.token);
+      setAlertSuccess("Konto utworzone pomyślnie!");
+      setApiError("");
     } catch (err) {
       console.error("Błąd rejestracji:", err.response || err);
       // jeśli DRF zwraca błędy walidacji, będą w err.response.data
       if (err.response && err.response.data) {
         setApiError(JSON.stringify(err.response.data));
+        setAlertSuccess("");
       } else {
         setApiError("Coś poszło nie tak. Spróbuj ponownie.");
+        setAlertSuccess("");
       }
     } finally {
       setLoading(false);
@@ -87,7 +87,9 @@ export const SignUp = () => {
         ))}
 
         {apiError && <div className="text-red-400 text-sm">{apiError}</div>}
-
+        {alertSuccess && (
+          <div className={"text-green-400 text-sm"}>{alertSuccess}</div>
+        )}
         <Button
           type="submit"
           className="w-full"
