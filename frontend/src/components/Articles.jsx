@@ -3,6 +3,9 @@ import Heading from "./Heading.jsx";
 import AxiosInstance from "./AxiosInstance.jsx";
 import Section from "./Section.jsx";
 import Arrow from "../assets/svg/Arrow.jsx";
+import Button from "./Button.jsx";
+import ButtonSvg from "../assets/svg/ButtonSvg.jsx";
+import { Link } from "react-router-dom";
 
 const Articles = () => {
   const [articles, setArticles] = useState([]);
@@ -48,25 +51,49 @@ const Articles = () => {
             >
               <div
                 className={
-                  "relative z-2 flex flex-col min-h-[22rem] p-[2.4rem] pointer-events-none"
+                  "relative z-2 flex flex-col min-h-[22rem] p-[2.4rem]"
                 }
               >
-                <h5 className={"h5 mv-5"}>{art.title}</h5>
-                <img
-                  src={"./src/assets/1.jpg"}
-                  className={
-                    "opacity-60 backdrop-brightness-50 border-2 border-color-5 mt-5"
-                  }
-                />
-                <div className={"mt-5 flex flex-row justify-end"}>
-                  <p>{art.created_by}</p>
+                <div className={"absolute inset-0.5 bg-n-8"}>
+                  <div className={"absolute inset-0 opacity-10"}>
+                    {
+                      <img
+                        src={"./src/assets/2.jpeg"}
+                        width={380}
+                        height={362}
+                        alt={"zdjecie"}
+                        className={"w-full h-full object-cover"}
+                      />
+                    }
+                  </div>
                 </div>
-                <div
-                  className={"flex items-center mt-auto justify-between mt-5"}
-                >
-                  <p>{art.created_at}</p>
-                  <p className={"ml-auto font-bold"}>Przejdź do artykułu</p>
-                  <Arrow />
+                <div className={"relative z-10 flex flex-col"}>
+                  <h5 className={"h5 mv-5"}>{art.title}</h5>
+                  <img
+                    src={"./src/assets/1.jpg"}
+                    className={
+                      "opacity-80 backdrop-brightness-50 border-2 border-color-5 mt-5"
+                    }
+                  />
+                  <div className={"mt-5 flex flex-row justify-end"}>
+                    <p className={"text font-code text-color-1"}>
+                      Autor : {art.created_by}
+                    </p>
+                  </div>
+                  <div
+                    className={"flex items-center mt-auto justify-between mt-5"}
+                  >
+                    <p>{art.created_at}</p>
+                    <Link
+                      to={`/articles/${art.id}`}
+                      className={
+                        "group ml-auto font-bold flex items-center gap-1 hover:underline hover:text-color-5 transition-all duration-200"
+                      }
+                    >
+                      <span>Przejdź do artykułu</span>
+                      <Arrow className={"group-hover:translate-x-2 "} />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Router } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
@@ -11,6 +11,7 @@ import Login from "./components/Login.jsx";
 import { useState } from "react";
 import Classes from "./components/Classes.jsx";
 import Articles from "./components/Articles.jsx";
+import CertainArticle from "./components/CertainArticle.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -45,7 +46,10 @@ const App = () => {
           <Route path="/signup" element={<SignUp />} />
           <Route path={"/login"} element={<Login />} />
           <Route path={"/classes"} element={<Classes />} />
+        </Routes>
+        <Routes>
           <Route path={"/articles"} element={<Articles />} />
+          <Route path={"/articles/:id"} element={<CertainArticle />} />
         </Routes>
       </div>
       <ButtonGradient />
