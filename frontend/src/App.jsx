@@ -12,6 +12,7 @@ import { useState } from "react";
 import Classes from "./components/Classes.jsx";
 import Articles from "./components/Articles.jsx";
 import CertainArticle from "./components/CertainArticle.jsx";
+import CalendarOfEvents from "./components/CalendarOfEvents.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -50,6 +51,9 @@ const App = () => {
         <Routes>
           <Route path={"/articles"} element={<Articles />} />
           <Route path={"/articles/:id"} element={<CertainArticle />} />
+        </Routes>
+        <Routes>
+          <Route path={"/calendar"} element={<CalendarOfEvents />} />
         </Routes>
       </div>
       <ButtonGradient />

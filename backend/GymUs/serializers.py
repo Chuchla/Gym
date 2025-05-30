@@ -28,8 +28,11 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    client_ids = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False
+    trainer_name = serializers.ReadOnlyField(source='trainer.username')
+    client_ids = serializers.PrimaryKeyRelatedField(
+        source='reservation_set',
+        read_only=True,
+        many=True
     )
 
     class Meta:
@@ -37,9 +40,9 @@ class EventSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'date', 'time',
             'capacity', 'place', 'is_personal_training',
-            'trainer', 'client_ids'
+            'trainer', 'trainer_name', 'client_ids'
         ]
-        read_only_fields = ['trainer']
+        read_only_fields = ['trainer', 'trainer_name', 'client_ids']
 
     def create(self, validated_data):
         client_ids = validated_data.pop('client_ids', [])

@@ -20,7 +20,8 @@ AxiosInstance.interceptors.request.use(
       token &&
       !config.url.includes("register") &&
       !config.url.includes("login") &&
-      !config.url.includes("articles")
+      !config.url.includes("articles") &&
+      !config.url.includes("events")
     ) {
       config.headers.Authorization = `Bearer ${token}`;
     }

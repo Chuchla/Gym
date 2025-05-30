@@ -44,6 +44,23 @@ class ArticlesViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user)
 
 
+class EventViewSet(viewsets.ModelViewSet):
+    """
+    GET    /api/events/         → lista
+    GET    /api/events/{pk}/    → detail
+    POST   /api/events/         → create
+    PUT    /api/events/{pk}/    → update
+    DELETE /api/events/{pk}/    → destroy
+    """
+    queryset = Event.objects.all().order_by('date', 'time')
+    serializer_class = EventSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        # ustawiamy trenera jako bieżącego zalogowanego
+        serializer.save(trainer=self.request.user)
+
+
 class ClientView(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
@@ -119,14 +136,12 @@ def events_view(request):
     user = request.user
 
     if request.method == 'GET':
-        if user.role != 'trainer':
-            return Response({'error': 'Tylko trenerzy mają dostęp.'}, status=403)
         events = Event.objects.filter(trainer=user)
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        if user.role != 'trainer':
+        if user.role != 'trainer' or 'admin':
             return Response({'error': 'Tylko trenerzy mogą dodawać wydarzenia.'}, status=403)
         serializer = EventSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
