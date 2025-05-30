@@ -36,6 +36,46 @@ import {
   yourlogo,
 } from "../assets";
 
+export const loggedInNavigation = [
+  {
+    id: "0",
+    title: "Messages",
+    url: "/#messages",
+  },
+  {
+    id: "1",
+    title: "Shop",
+    url: "/#shop",
+  },
+  {
+    id: "2",
+    title: "Classes",
+    url: "/classes",
+  },
+  {
+    id: "3",
+    title: "Calendar",
+    url: "/calendar",
+  },
+  {
+    id: "4",
+    title: "Articles",
+    url: "/articles",
+  },
+  {
+    id: "5",
+    title: "LogOut",
+    url: "/#logout",
+    onlyMobile: true,
+  },
+  {
+    id: "6",
+    title: "My account",
+    url: "/#myacc",
+    onlyMobile: true,
+  },
+];
+
 export const navigation = [
   {
     id: "0",
@@ -65,13 +105,13 @@ export const navigation = [
   {
     id: "5",
     title: "New account",
-    url: "#signup",
+    url: "/signup",
     onlyMobile: true,
   },
   {
     id: "6",
     title: "Sign in",
-    url: "#login",
+    url: "/login",
     onlyMobile: true,
   },
 ];

@@ -1,6 +1,6 @@
-import { brainwave, gymUsLogo } from "../assets/index.js";
-import { navigation } from "../constans/index.jsx";
-import { useLocation } from "react-router-dom";
+import { gymUsLogo } from "../assets/index.js";
+import { loggedInNavigation, navigation } from "../constans/index.jsx";
+import { useLocation, useNavigate } from "react-router-dom";
 import Button from "./Button.jsx";
 import MenuSvg from "../assets/svg/MenuSvg.jsx";
 import { HamburgerMenu } from "./design/Header.jsx";
@@ -9,9 +9,11 @@ import {
   disablePageScroll,
   enablePageScroll,
 } from "scroll-lock/dist/scroll-lock.js";
+import { isLoggedIn, logout } from "../Utils/Auth.jsx";
 
 const Header = () => {
   const pathName = useLocation();
+  const navigate = useNavigate();
   const [openNavigation, setOpenNavigation] = useState(false);
   const toggleNavigation = () => {
     if (openNavigation) {
@@ -27,6 +29,8 @@ const Header = () => {
     enablePageScroll();
     setOpenNavigation(false);
   };
+
+  const menuItems = isLoggedIn() ? loggedInNavigation : navigation;
   return (
     <div
       className={`fixed top-0 left-0 z-50 w-full border-b
@@ -46,11 +50,19 @@ const Header = () => {
               "relative z-2 flex flex-col items-center justify-center m-auto lg:flex-row"
             }
           >
-            {navigation.map((item) => (
+            {menuItems.map((item) => (
               <a
                 key={item.id}
                 href={item.url}
-                onClick={handleClick}
+                onClick={() => {
+                  handleClick();
+                  if (item.title === "LogOut") {
+                    logout();
+                    navigate("/");
+                  } else if (item.title === "My account") {
+                    navigate("/account");
+                  }
+                }}
                 className={`block relative font-code text-2xl uppercase
                 text-n-1 transition-colors hover:text-color-1 
                 ${item.onlyMobile ? "lg:hidden" : ""} 
@@ -64,17 +76,35 @@ const Header = () => {
           </div>
           <HamburgerMenu />
         </nav>
-        <a
-          href={"/signup"}
-          className={
-            "button hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
-          }
-        >
-          New Account
-        </a>
-        <Button className={"hidden lg:flex"} href={"/login"}>
-          Sign in
-        </Button>
+        {isLoggedIn() ? (
+          <>
+            <a
+              className="button hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
+              onClick={() => {
+                logout();
+                window.location.href = "/";
+              }}
+            >
+              Log Out
+            </a>
+            <Button className="hidden lg:flex" href="/account">
+              My account
+            </Button>
+          </>
+        ) : (
+          <>
+            <a
+              href="/signup"
+              className="button hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
+            >
+              New Account
+            </a>
+            <Button className="hidden lg:flex" href="/login">
+              Sign in
+            </Button>
+          </>
+        )}
+
         <Button
           className={"ml-auto lg:hidden"}
           px={"px-3"}
