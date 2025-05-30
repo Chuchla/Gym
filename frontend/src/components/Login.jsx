@@ -4,11 +4,14 @@ import Heading from "./Heading.jsx";
 import Button from "./Button.jsx";
 import { login as loginFields } from "../constans/login_const.jsx";
 import AxiosInstance from "./AxiosInstance.jsx";
+import { href, useNavigate } from "react-router-dom";
 
 const Login = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({});
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -51,14 +54,20 @@ const Login = ({ onLogin }) => {
 
       // **LOG**: informacja o sukcesie i token
       console.log("✅ ZALOGOWANO POMYŚLNIE! Access token:", access);
-
+      setSuccess("Zalogowano pomyślnie! Przenoszenie do strony głównej...");
       if (onLogin) onLogin(access);
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (err) {
       console.error("Login error:", err.response || err);
       if (err.response?.status === 401) {
         setError("Nieprawidłowy email lub hasło");
+        setSuccess(null);
       } else {
         setError("Błąd serwera. Spróbuj ponownie później.");
+        setSuccess(null);
       }
     } finally {
       setLoading(false);
@@ -86,7 +95,7 @@ const Login = ({ onLogin }) => {
         ))}
 
         {error && <div className="text-red-400 text-sm">{error}</div>}
-
+        {success && <div className={"text-green-400 text-sm"}>{success}</div>}
         <Button
           type="submit"
           className="w-full"
