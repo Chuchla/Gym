@@ -40,6 +40,7 @@ const App = () => {
                 <Hero />
                 <Benefits />
                 <Memberships />
+                <Classes />
               </>
             }
           />

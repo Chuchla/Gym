@@ -136,61 +136,6 @@ export const brainwaveServicesIcons = [
   sliders04,
 ];
 
-export const roadmap = [
-  {
-    id: "0",
-    title: "Voice recognition",
-    text: "Enable the chatbot to understand and respond to voice commands, making it easier for users to interact with the app hands-free.",
-    date: "May 2023",
-    status: "done",
-    imageUrl: roadmap1,
-    colorful: true,
-  },
-  {
-    id: "1",
-    title: "Gamification",
-    text: "Add game-like elements, such as badges or leaderboards, to incentivize users to engage with the chatbot more frequently.",
-    date: "May 2023",
-    status: "progress",
-    imageUrl: roadmap2,
-  },
-  {
-    id: "3",
-    title: "Integration with APIs",
-    text: "Allow the chatbot to access external data sources, such as weather APIs or news APIs, to provide more relevant recommendations.",
-    date: "May 2023",
-    status: "progress",
-    imageUrl: roadmap4,
-  },
-  {
-    id: "2",
-    title: "Chatbot customization",
-    text: "Allow users to customize the chatbot's appearance and behavior, making it more engaging and fun to interact with.",
-    date: "May 2023",
-    status: "done",
-    imageUrl: roadmap3,
-  },
-];
-
-export const collabText =
-  "With smart automation and top-notch security, it's the perfect solution for teams looking to work smarter.";
-
-export const collabContent = [
-  {
-    id: "0",
-    title: "Seamless Integration",
-    text: collabText,
-  },
-  {
-    id: "1",
-    title: "Smart Automation",
-  },
-  {
-    id: "2",
-    title: "Top-notch Security",
-  },
-];
-
 export const collabApps = [
   {
     id: "0",
@@ -338,6 +283,68 @@ export const benefits = [
     backgroundUrl: "./src/assets/benefits/card-6.svg",
     iconUrl: benefitIcon2,
     imageUrl: benefitImage2,
+  },
+];
+
+export const classes = [
+  {
+    id: "0",
+    title: "Boks",
+    description:
+      "Wyładuj się na worku bokserskim. Naucz się wyprowadzać ciosy i trzymać gardę!",
+    photoUrl: "./src/assets/books.jpg",
+    backgroundPhoto: "",
+    intensity: 4,
+    time: "55",
+  },
+  {
+    id: "1",
+    title: "Rowery",
+    description:
+      "Zalicz wyścig rowerowy w takt energetyzującej muzyki. Pobudzenie gwarantowane!",
+    photoUrl: "./src/assets/rowery.jpg",
+    backgroundPhoto: "",
+    intensity: 3,
+    time: "55",
+  },
+  {
+    id: "2",
+    title: "Joga",
+    description:
+      "Odpocznij psychicznie podczas ćwiczeń relaksacyjnych i oddechowych.",
+    photoUrl: "./src/assets/joga.jpg",
+    backgroundPhoto: "",
+    intensity: 2,
+    time: "55",
+  },
+  {
+    id: "3",
+    title: "Zumba",
+    description: "Daj się porwać do tańca gorącym, latynowskim rytmom!",
+    photoUrl: "./src/assets/zumba.jpg",
+    backgroundPhoto: "",
+    intensity: 2,
+    time: "55",
+  },
+  {
+    id: "4",
+    title: "Płaski brzuch",
+    description:
+      "Spalaj nadmiar tkanki tłuszczowej i wzmacniaj mięśnie brzucha.",
+    photoUrl: "./src/assets/plaski_brzuch.jpg",
+    backgroundPhoto: "",
+    intensity: 2,
+    time: "55",
+  },
+  {
+    id: "5",
+    title: "Trening funkcjonalny",
+    description:
+      "Rozruszaj całe ciało. Poprawiaj wydolnośc i modeluj sylwetkę.",
+    photoUrl: "./src/assets/trening_funkcjonalny.jpg",
+    backgroundPhoto: "",
+    intensity: 2,
+    time: "55",
   },
 ];
 
