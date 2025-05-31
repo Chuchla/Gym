@@ -50,6 +50,8 @@ export default {
         0.25: "0.0625rem",
         7.5: "1.875rem",
         15: "3.75rem",
+        "1/3": "33.333333%",
+        "2/3": "66.666666%",
       },
       opacity: {
         15: ".15",
@@ -84,6 +86,7 @@ export default {
     },
   },
   plugins: [
+    require("@tailwindcss/aspect-ratio"),
     plugin(function ({ addBase, addComponents, addUtilities }) {
       addBase({});
       addComponents({

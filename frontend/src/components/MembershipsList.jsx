@@ -17,11 +17,15 @@ const MembershipsList = () => {
           }
         >
           <h4 className={"h4 mb-4"}>{item.title}</h4>
-          <p className={"body-2 min-h-[4rem] mb-3 text-n-1/50 fa-align-left"}>
+          <p
+            className={
+              "body-2 min-h-[4rem] mb-3 text-n-1/50 fa-align-left text-justify"
+            }
+          >
             {item.description}
           </p>
 
-          <div className={"flex items-center h-[5.5rem] mb-6"}>
+          <div className={"flex justify-center items-center h-[5.5rem] mb-6"}>
             {item.price && (
               <>
                 <div className={"text-[5.5rem] leading-none font-bold"}>
@@ -45,7 +49,7 @@ const MembershipsList = () => {
                 className={"flex item-start py-5 border-t border-n-6"}
               >
                 <img src={check} width={24} height={24} alt={"check"} />
-                <p className={"body-2 ml-4"}>{feature}</p>
+                <p className={"body-2 ml-4 text-justify"}>{feature}</p>
               </li>
             ))}
           </ul>
