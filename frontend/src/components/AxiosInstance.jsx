@@ -12,7 +12,6 @@ const AxiosInstance = axios.create({
   },
 });
 
-// interceptor request – dopisze nagłówek Authorization, jeśli mamy token
 AxiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
@@ -20,8 +19,7 @@ AxiosInstance.interceptors.request.use(
       token &&
       !config.url.includes("register") &&
       !config.url.includes("login") &&
-      !config.url.includes("articles") &&
-      !config.url.includes("events")
+      !config.url.includes("articles")
     ) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -29,6 +29,10 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     trainer_name = serializers.ReadOnlyField(source='trainer.username')
+
+    reserved_count = serializers.SerializerMethodField(read_only=True)
+    remaining_spots = serializers.SerializerMethodField(read_only=True)
+
     client_ids = serializers.PrimaryKeyRelatedField(
         source='reservation_set',
         read_only=True,
@@ -40,9 +44,18 @@ class EventSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'date', 'time',
             'capacity', 'place', 'is_personal_training',
-            'trainer', 'trainer_name', 'client_ids'
+            'trainer', 'trainer_name', 'reserved_count', 'remaining_spots', 'client_ids'
         ]
-        read_only_fields = ['trainer', 'trainer_name', 'client_ids']
+        read_only_fields = ['trainer', 'trainer_name',
+                            'reserved_count',
+                            'remaining_spots',
+                            'client_ids', ]
+
+    def get_reserved_count(self, obj):
+        return obj.reservations.count()
+
+    def get_remaining_spots(self, obj):
+        return max(obj.capacity - obj.reservations.count(), 0)
 
     def create(self, validated_data):
         client_ids = validated_data.pop('client_ids', [])
