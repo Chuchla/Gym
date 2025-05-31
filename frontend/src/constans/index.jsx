@@ -50,7 +50,7 @@ export const loggedInNavigation = [
   {
     id: "2",
     title: "Classes",
-    url: "/classes",
+    url: "/#classes",
   },
   {
     id: "3",
@@ -90,7 +90,7 @@ export const navigation = [
   {
     id: "2",
     title: "Classes",
-    url: "/classes",
+    url: "/#classes",
   },
   {
     id: "3",

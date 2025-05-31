@@ -4,10 +4,12 @@ import Header from "./Header.jsx";
 import Heading from "./Heading.jsx";
 import { classes } from "../constans/index.jsx";
 import { done, undone } from "../assets/index.js";
+import Arrow from "../assets/svg/Arrow.jsx";
+import { Link } from "react-router-dom";
 
 const Classes = () => {
   return (
-    <Section id={"/classes"}>
+    <Section id={"classes"}>
       <div className={"container relative z-2"}>
         <Heading
           title={
@@ -72,6 +74,21 @@ const Classes = () => {
                 <div className={"text-sm text-left font-light"}>
                   Czas trwania: {item.time} m
                 </div>
+                <Link
+                  to={"/calendar"}
+                  className={
+                    "group ml-auto font-bold flex items-center gap-1 hover:underline hover:text-color-5 transition-all duration-200"
+                  }
+                >
+                  <span
+                    className={
+                      "text-sm text-blue-600 hover:text-color-5 duration-200"
+                    }
+                  >
+                    Znajdź wolne zajęcia
+                  </span>
+                  <Arrow className={"group-hover:translate-x-6"} />
+                </Link>
               </div>
             </div>
           ))}

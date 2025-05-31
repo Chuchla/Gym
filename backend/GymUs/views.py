@@ -1,5 +1,4 @@
-import jwt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from GymDB import settings
 from rest_framework import viewsets, permissions, status
 from .serializers import *
@@ -10,8 +9,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class RegisterViewSet(viewsets.ViewSet):
@@ -51,14 +48,62 @@ class EventViewSet(viewsets.ModelViewSet):
     POST   /api/events/         → create
     PUT    /api/events/{pk}/    → update
     DELETE /api/events/{pk}/    → destroy
+    POST   /api/events/{pk}/reserve/    → zapisanie się na wydarzenie
     """
     queryset = Event.objects.all().order_by('date', 'time')
     serializer_class = EventSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_permissions(self):
+        if self.action in ['list', 'retrive']:
+            return [permissions.AllowAny()]
+        elif self.action == 'reserve':
+            return [permissions.IsAuthenticated()]
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated()]
+
     def perform_create(self, serializer):
-        # ustawiamy trenera jako bieżącego zalogowanego
         serializer.save(trainer=self.request.user)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+        url_path='reserve',
+        url_name='reserve'
+    )
+    def reserve(self, request, pk=None):
+        """
+        POST /api/events/{pk}/reserve/
+        """
+        user = request.user
+        try:
+            event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
+            return Response(
+                {'detail': 'Event nie istnieje'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        reserved_count = event.reservations.count()
+        if reserved_count >= event.capacity:
+            return Response(
+                {'detail': 'Brak wolnych miejsc.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        already = Reservation.objects.filter(client=user, event=event).exists()
+        if already:
+            return Response(
+                {'detail': "Już jestes zapisany na ten event."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        Reservation.objects.create(
+            client=user,
+            event=event,
+            date=event.date,
+        )
+        serializer = self.get_serializer(event)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ClientView(viewsets.ModelViewSet):
