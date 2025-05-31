@@ -75,8 +75,6 @@ TEMPLATES = [
     },
 ]
 
-
-
 WSGI_APPLICATION = 'GymDB.wsgi.application'
 
 # Database
@@ -87,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Gym_sys_app',
         'USER': 'root',
-        'PASSWORD': 'bazydanych',
+        'PASSWORD': 'Pies1234pies!',
         'HOST': 'localhost',
         'PORT': '3306',
     }

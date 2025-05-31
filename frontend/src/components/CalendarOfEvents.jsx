@@ -74,7 +74,7 @@ const CalendarOfEvents = () => {
               Zawartość kalendarza:
               inline-flex flex-col => header i body skrolują razem
             */}
-            <div className="inline-flex flex-col min-w-max rounded-xl bg-n-8">
+            <div className=" flex-col min-w-max rounded-xl bg-n-8">
               {/*
                 =======================================================
                 A) Wiersz 1: Nagłówki dni + pusta komórka nad godziną
