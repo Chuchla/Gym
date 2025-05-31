@@ -136,45 +136,6 @@ def login_client(request):
     except Client.DoesNotExist:
         return Response({'error': 'Użytkownik nie istnieje'}, status=status.HTTP_404_NOT_FOUND)
 
-
-@api_view(['POST'])
-def login_view(request):
-    serializer = ClientLoginSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    client = serializer.validated_data['client']
-
-    payload = {
-        "client_id": client.id,
-        "email": client.email,
-    }
-    # Upewnij się, że importujesz PyJWT: `import jwt`
-    token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-
-    return Response({"token": token}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-def register_view(request):
-    serializer = ClientRegistrationSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    client = serializer.save()
-
-    # generujemy prosty JWT
-    payload = {'client_id': client.id, 'email': client.email}
-    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-
-    return Response({
-        'client': {
-            'id': client.id,
-            'first_name': client.first_name,
-            'last_name': client.last_name,
-            'email': client.email,
-            'phone_number': client.phone_number,
-        },
-        'token': token,
-    }, status=status.HTTP_201_CREATED)
-
-
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def events_view(request):
@@ -228,3 +189,49 @@ def get_trainer_classes(request):
     events = Event.objects.filter(employee__email=user.email)
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
+
+
+class MembershipTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint do przeglądania dostępnych typów karnetów.
+    GET /api/membership-types/ - lista typów karnetów
+    GET /api/membership-types/{id}/ - szczegóły typu karnetu
+    """
+    queryset = MembershipType.objects.all()
+    serializer_class = MembershipTypeSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class MembershipViewSet(viewsets.mixins.ListModelMixin,
+                              viewsets.mixins.RetrieveModelMixin,
+                              viewsets.GenericViewSet):
+    """
+    API endpoint do zarządzania karnetami klienta.
+    GET /api/my-memberships/ - lista karnetów zalogowanego użytkownika
+    GET /api/my-memberships/{id}/ - szczegóły konkretnego karnetu użytkownika
+    """
+    serializer_class = MembershipSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Membership.objects.filter(client=self.request.user).order_by('-purchase_date')
+
+
+class PurchaseMembershipView(viewsets.ViewSet): # Lub użyj generics.CreateAPIView
+    """
+    API endpoint do zakupu karnetu.
+    POST /api/purchase-membership/ - zakup karnetu
+        {
+            "membership_type_id": ID_TYPU_KARNETU
+        }
+    """
+    serializer_class = PurchaseMembershipSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            client_membership = serializer.save()
+            response_serializer = MembershipSerializer(client_membership, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

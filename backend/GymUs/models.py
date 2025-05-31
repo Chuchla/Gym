@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 class ClientUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -87,17 +89,50 @@ class Activities(models.Model):
         return f"Activity {self.id} on {self.date}"
 
 
-class Membership(models.Model):
-    active_from = models.DateField()
-    active_to = models.DateField()
-    type = models.CharField(max_length=255)
-    status = models.CharField(max_length=255)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='memberships')
+class MembershipType(models.Model):
+    name = models.CharField(max_length=100, unique=True, help_text="Np. Karnet Miesięczny OPEN")
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_days = models.IntegerField(help_text="Czas trwania karnetu w dniach")
 
     def __str__(self):
-        return f"Membership {self.type} ({self.status})"
+        return f"{self.name} ({self.price} PLN, {self.duration_days} dni)"
 
 
+class Membership(models.Model):
+#    active_from = models.DateField()
+#    active_to = models.DateField()
+#    type = models.CharField(max_length=255)
+#    status = models.CharField(max_length=255)
+#    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='memberships')
+#
+#    def __str__(self):
+#        return f"Membership {self.type} ({self.status})"
+
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='memberships')
+    membership_type = models.ForeignKey(MembershipType, on_delete=models.PROTECT, related_name='instances', null=True)
+    purchase_date = models.DateTimeField(default=timezone.now, editable=False)
+    active_from = models.DateField()
+    active_to = models.DateField()
+
+    STATUS_CHOICES = [
+        ('pending_payment', 'Oczekuje na płatność'),
+        ('active', 'Aktywny'),
+        ('expired', 'Wygasły'),
+        ('cancelled', 'Anulowany'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending_payment')
+
+    def __str__(self):
+        if self.membership_type:
+             return f"Karnet {self.membership_type.name} dla {self.client.email} (od {self.active_from} do {self.active_to})"
+        return f"Karnet (bez typu) dla {self.client.email} (od {self.active_from} do {self.active_to})"
+
+
+    def save(self, *args, **kwargs):
+        if self.active_from and self.membership_type and not self.active_to:
+            self.active_to = self.active_from + timedelta(days=self.membership_type.duration_days)
+        super().save(*args, **kwargs)
 
 
 class Event(models.Model):
