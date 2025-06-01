@@ -11,6 +11,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.http import Http404
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import MembershipFilter
 
 
 User = get_user_model()
@@ -208,15 +210,12 @@ class MembershipTypeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class MembershipViewSet(viewsets.mixins.ListModelMixin,
-                              viewsets.mixins.RetrieveModelMixin,
-                              viewsets.GenericViewSet):
-    """
-    API endpoint do zarządzania karnetami klienta.
-    GET /api/my-memberships/ - lista karnetów zalogowanego użytkownika
-    GET /api/my-memberships/{id}/ - szczegóły konkretnego karnetu użytkownika
-    """
+                            viewsets.mixins.RetrieveModelMixin,
+                            viewsets.GenericViewSet):
     serializer_class = MembershipSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MembershipFilter
 
     def get_queryset(self):
         return Membership.objects.filter(client=self.request.user).order_by('-purchase_date')
