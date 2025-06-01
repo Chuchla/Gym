@@ -1,6 +1,6 @@
 import React from "react";
 import Section from "./Section.jsx";
-import { smallSphere, stars } from "../assets/index.js";
+import { smallSphere, stars, sztanga_gradient } from "../assets/index.js";
 import Heading from "./Heading.jsx";
 import MembershipsList from "./MembershipsList.jsx";
 import { LeftLine, RightLine } from "./design/Pricing.jsx";
@@ -11,9 +11,9 @@ const Memberships = () => {
       <div className={"container relative z-2"}>
         <div className={"hidden relative justify-center mb-[6.5rem] lg:flex"}>
           <img
-            src={smallSphere}
+            src={sztanga_gradient}
             className={"relative z-1"}
-            width={255}
+            width={500}
             height={255}
             alt={"sphere"}
           />

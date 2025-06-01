@@ -68,8 +68,8 @@ const CalendarOfEvents = () => {
         </div>
 
         {/* Główny wrapper z poziomym przewijaniem */}
-        <div className="rounded-2xl bg-gradient-to-r from-purple-400 via-purple-800 to-transparent mx-4">
-          <div className="rounded-2xl bg-n-8 overflow-x-auto">
+        <div className="rounded-2xl bg-gradient-to-r from-purple-400 via-purple-800 to-transparent p-2 mx-4">
+          <div className="rounded-2xl bg-n-8 overflow-auto">
             {/*
               Zawartość kalendarza:
               inline-flex flex-col => header i body skrolują razem

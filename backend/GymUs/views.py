@@ -52,10 +52,9 @@ class EventViewSet(viewsets.ModelViewSet):
     """
     queryset = Event.objects.all().order_by('date', 'time')
     serializer_class = EventSerializer
-    permission_classes = [permissions.AllowAny]
 
     def get_permissions(self):
-        if self.action in ['list', 'retrive']:
+        if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         elif self.action == 'reserve':
             return [permissions.IsAuthenticated()]
@@ -136,6 +135,7 @@ def login_client(request):
     except Client.DoesNotExist:
         return Response({'error': 'Użytkownik nie istnieje'}, status=status.HTTP_404_NOT_FOUND)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def events_view(request):
@@ -203,8 +203,8 @@ class MembershipTypeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class MembershipViewSet(viewsets.mixins.ListModelMixin,
-                              viewsets.mixins.RetrieveModelMixin,
-                              viewsets.GenericViewSet):
+                        viewsets.mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
     """
     API endpoint do zarządzania karnetami klienta.
     GET /api/my-memberships/ - lista karnetów zalogowanego użytkownika
@@ -217,7 +217,7 @@ class MembershipViewSet(viewsets.mixins.ListModelMixin,
         return Membership.objects.filter(client=self.request.user).order_by('-purchase_date')
 
 
-class PurchaseMembershipView(viewsets.ViewSet): # Lub użyj generics.CreateAPIView
+class PurchaseMembershipView(viewsets.ViewSet):  # Lub użyj generics.CreateAPIView
     """
     API endpoint do zakupu karnetu.
     POST /api/purchase-membership/ - zakup karnetu

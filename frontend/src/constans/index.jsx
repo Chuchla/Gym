@@ -34,6 +34,7 @@ import {
   telegram,
   twitter,
   yourlogo,
+  sztanga_gradient,
 } from "../assets";
 
 export const loggedInNavigation = [
@@ -239,7 +240,7 @@ export const benefits = [
     text: "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     iconUrl: benefitIcon1,
-    imageUrl: benefitImage2,
+    imageUrl: "./src/assets/1.jpg",
     light: true,
   },
   {
@@ -248,7 +249,7 @@ export const benefits = [
     text: "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
     backgroundUrl: "./src/assets/benefits/card-2.svg",
     iconUrl: benefitIcon2,
-    imageUrl: benefitImage2,
+    imageUrl: "./src/assets/2.jpeg",
   },
   {
     id: "2",
@@ -256,7 +257,7 @@ export const benefits = [
     text: "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
     backgroundUrl: "./src/assets/benefits/card-3.svg",
     iconUrl: benefitIcon3,
-    imageUrl: benefitImage2,
+    imageUrl: "./src/assets/3.jpg",
   },
   {
     id: "3",
@@ -264,7 +265,7 @@ export const benefits = [
     text: "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
     backgroundUrl: "./src/assets/benefits/card-4.svg",
     iconUrl: benefitIcon4,
-    imageUrl: benefitImage2,
+    imageUrl: "./src/assets/4.jpg",
     light: true,
   },
   {
@@ -273,7 +274,7 @@ export const benefits = [
     text: "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
     backgroundUrl: "./src/assets/benefits/card-5.svg",
     iconUrl: benefitIcon1,
-    imageUrl: benefitImage2,
+    imageUrl: "./src/assets/5.jpg",
     light: true,
   },
   {
@@ -282,7 +283,7 @@ export const benefits = [
     text: "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
     backgroundUrl: "./src/assets/benefits/card-6.svg",
     iconUrl: benefitIcon2,
-    imageUrl: benefitImage2,
+    imageUrl: "./src/assets/6.jpg",
   },
 ];
 
