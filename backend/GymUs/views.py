@@ -105,9 +105,24 @@ class EventViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class ClientView(viewsets.ModelViewSet):
+class ClientViewSet(viewsets.ModelViewSet):
+    """
+    GET /api/clients/ → lista, GET /api/clients/{pk}/ → szczegóły,
+    PUT, PATCH, DELETE (if admin).
+    GET /api/clients/me/ → zwraca dane aktualnie zalogowanego klienta.
+    """
+    queryset = Client.objects.all().order_by('date_joined')
     serializer_class = ClientSerializer
-    queryset = Client.objects.all()
+
+    def get_permissions(self):
+        if self.action == "me":
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
+
+    @action(detail=False, methods=["get"], url_path="me")
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

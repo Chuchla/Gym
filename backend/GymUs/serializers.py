@@ -24,7 +24,16 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ['first_name', 'last_name', 'email', 'phone_number', 'password']
+        fields = [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'date_joined',
+            'role',
+        ]
+        read_only_fields = ['id', 'date_joined', 'role']
 
 
 class EventSerializer(serializers.ModelSerializer):
