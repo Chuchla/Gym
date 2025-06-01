@@ -146,10 +146,33 @@ class ClientRegistrationSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class FeatureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feature
+        fields = ['id', 'name']
+
+
 class MembershipTypeSerializer(serializers.ModelSerializer):
+    features = FeatureSerializer(many=True, read_only=True)
+
+    feature_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Feature.objects.all(),
+        many=True,
+        write_only=True,
+        source='features'
+    )
+
     class Meta:
         model = MembershipType
-        fields = ['id', 'name', 'description', 'price', 'duration_days']
+        fields = fields = [
+            'id',
+            'name',
+            'description',
+            'price',
+            'duration_days',
+            'features',  # do odczytu
+            'feature_ids',  # do zapisu
+        ]
 
 
 class MembershipSerializer(serializers.ModelSerializer):

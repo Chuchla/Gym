@@ -2,10 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.hashers import make_password
 from django.template.response import TemplateResponse
 
-from .models import (
-    Client, Employee, Product, Activities, Membership, Event,
-    Reservation, Basket, BasketItem, Order, Payment, Message, Article, MembershipType
-)
+from .models import *
+
 
 class CustomAdminSite(admin.AdminSite):
     index_template = "admin/custom_index.html"
@@ -16,7 +14,9 @@ class CustomAdminSite(admin.AdminSite):
         extra_context['pending_memberships'] = Membership.objects.filter(status="pending_payment").count()
         return super().index(request, extra_context=extra_context)
 
+
 custom_admin_site = CustomAdminSite(name='custom_admin')
+
 
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('title', 'created_by', 'created_at', 'is_approved')
@@ -28,10 +28,12 @@ class ArticleAdmin(admin.ModelAdmin):
     def approve_articles(self, request, queryset):
         queryset.update(is_approved=True)
 
+
 class ClientAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email', 'role')
     search_fields = ('first_name', 'last_name', 'email')
     list_filter = ('role',)
+
 
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email')
@@ -40,6 +42,7 @@ class EmployeeAdmin(admin.ModelAdmin):
         if 'password' in form.changed_data:
             obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
+
 
 class MembershipAdmin(admin.ModelAdmin):
     list_display = ('client', 'membership_type', 'active_from', 'active_to', 'status', 'purchase_date')
@@ -52,10 +55,12 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ('is_personal_training', 'trainer')
     search_fields = ('name', 'trainer__first_name', 'trainer__last_name')
 
+
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ('client', 'event', 'date')
     list_filter = ('event', 'client')
     search_fields = ('client__first_name', 'client__last_name', 'event__name')
+
 
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('client', 'date')
@@ -63,7 +68,15 @@ class ActivityAdmin(admin.ModelAdmin):
 
 
 class MembershipTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'duration_days')
+    list_display = ('id', 'name', 'price', 'duration_days')
+    search_fields = ['name']
+    list_filter = ['duration_days']
+
+    filter_horizontal = ('features',)
+
+
+class FeatureAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
     search_fields = ('name',)
 
 
@@ -74,5 +87,6 @@ custom_admin_site.register(Product)
 custom_admin_site.register(Activities, ActivityAdmin)
 custom_admin_site.register(Membership, MembershipAdmin)
 custom_admin_site.register(MembershipType, MembershipTypeAdmin)
+custom_admin_site.register(Feature, FeatureAdmin)
 custom_admin_site.register(Event, EventAdmin)
 custom_admin_site.register(Reservation, ReservationAdmin)

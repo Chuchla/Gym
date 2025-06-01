@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register_client, login_client, events_view, login_employee, get_trainer_classes, create_article
+from .views import events_view, login_employee, get_trainer_classes, create_article
 
 urlpatterns = [
     path('events/', events_view, name='events'),
