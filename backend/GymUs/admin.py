@@ -48,6 +48,7 @@ class MembershipAdmin(admin.ModelAdmin):
     list_display = ('client', 'membership_type', 'active_from', 'active_to', 'status', 'purchase_date')
     list_filter = ('membership_type', 'status', 'active_from', 'active_to')
     search_fields = ('client__email', 'client__first_name', 'client__last_name', 'membership_type__name')
+    exclude = ('active_to',)
 
 
 class EventAdmin(admin.ModelAdmin):

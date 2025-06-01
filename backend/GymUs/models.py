@@ -128,7 +128,7 @@ class Membership(models.Model):
     membership_type = models.ForeignKey(MembershipType, on_delete=models.PROTECT, related_name='instances', null=True)
     purchase_date = models.DateTimeField(default=timezone.now, editable=False)
     active_from = models.DateField()
-    active_to = models.DateField()
+    active_to = models.DateField(null=True, blank=True)
 
     STATUS_CHOICES = [
         ('pending_payment', 'Oczekuje na płatność'),
