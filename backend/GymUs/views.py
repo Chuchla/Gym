@@ -427,3 +427,25 @@ class CheckoutCartView(APIView):
 
         serializer = CartOrderSerializer(active_order, context={'request': request})  # Zwróć sfinalizowane zamówienie
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class OrderViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint do przeglądania złożonych zamówień zalogowanego użytkownika.
+    GET /api/orders/ - lista złożonych zamówień użytkownika
+    GET /api/orders/{id}/ - szczegóły konkretnego zamówienia użytkownika
+    """
+    serializer_class = CartOrderSerializer  # Używamy tego samego serializera co dla koszyka, aby widzieć szczegóły
+    permission_classes = [permissions.IsAuthenticated]
+
+    # Opcjonalnie: dodaj filtrowanie, np. po statusie zamówienia
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_class = OrderFilter # Musiałbyś stworzyć OrderFilter w filters.py
+
+    def get_queryset(self):
+        """
+        Zwraca tylko zamówienia zalogowanego użytkownika,
+        które nie są już aktywnymi koszykami (czyli status != 'cart').
+        """
+        user = self.request.user
+        return Order.objects.filter(client=user).exclude(status='cart').order_by('-date', '-id')

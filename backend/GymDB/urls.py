@@ -15,6 +15,7 @@ router.register('membership-types', MembershipTypeViewSet, basename='membership-
 router.register('my-memberships', MembershipViewSet, basename='my-memberships')
 router.register('purchase-membership', PurchaseMembershipView, basename='purchase-membership')
 router.register(r'products', ProductViewSet, basename='product')
+router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
     path('admin/', custom_admin_site.urls),

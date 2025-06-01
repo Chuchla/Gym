@@ -29,6 +29,15 @@ const Shop = () => {
   return (
     <Section>
       <Heading title={"Zakup nasz plany treningowe!"} />
+      <div className={"flex flex-nowrap justify-center mb-8 "}>
+        <Link
+          className={"border-4 p-4 border-white hover:bg-pink-300"}
+          to={"/shop/mybasket/"}
+        >
+          <p>Przejdź do swojego koszyka</p>
+        </Link>
+      </div>
+
       <div className={"flex flex-col"}>
         {products.map((item) => (
           <Link

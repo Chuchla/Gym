@@ -8,22 +8,26 @@ import AxiosInstance from "./AxiosInstance.jsx";
 const MyAccount = () => {
   const [activeTab, setActiveTab] = useState("dane");
 
-  // DANE UŻYTKOWNIKA
+  // ——— 1) UŻYTKOWNIK ———
   const [userData, setUserData] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [errorUser, setErrorUser] = useState(null);
 
-  // KAR
+  // ——— 2) KAR (Membership) ———
   const [memberships, setMemberships] = useState([]);
   const [loadingMemberships, setLoadingMemberships] = useState(false);
   const [errorMemberships, setErrorMemberships] = useState(null);
 
-  // --- 1) fetch user ---
+  // ——— 3) ZAMÓWIENIA ———
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [errorOrders, setErrorOrders] = useState(null);
+
+  // ——— Pobierz dane użytkownika ———
   useEffect(() => {
     const fetchUser = async () => {
       setLoadingUser(true);
       try {
-        // UWAGA: kończący slash jest wymagany
         const resp = await AxiosInstance.get("clients/me/");
         setUserData(resp.data);
       } catch (err) {
@@ -36,23 +40,14 @@ const MyAccount = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    console.log("activeTab zmienilo sie:", activeTab);
-    if (activeTab !== "my_membership") {
-      console.log("nie pobieram karnetow bo nie jestesmy w tej zakladce");
-    }
-  });
-
-  // --- 2) fetch memberships (tylko gdy activeTab === "membership") ---
+  // ——— Pobierz karnety, gdy zakładka “Moje membershipy” ———
   useEffect(() => {
     if (activeTab !== "my_membership") return;
 
     const fetchMemberships = async () => {
       setLoadingMemberships(true);
       try {
-        // Znów: upewniamy się, że slash jest na końcu
-        const today = new Date().toISOString().slice(0, 10);
-        const resp = await AxiosInstance.get(`my-memberships/?status=active`);
+        const resp = await AxiosInstance.get("my-memberships/?status=active");
         setMemberships(resp.data);
       } catch (err) {
         console.error("Błąd podczas pobierania karnetów:", err);
@@ -65,7 +60,27 @@ const MyAccount = () => {
     fetchMemberships();
   }, [activeTab]);
 
-  // --- 3) Obsługa loadera / błędów / braku danych użytkownika ---
+  // ——— Pobierz zamówienia, gdy zakładka “Moje zamówienia” ———
+  useEffect(() => {
+    if (activeTab !== "my_orders") return;
+
+    const fetchOrders = async () => {
+      setLoadingOrders(true);
+      try {
+        const resp = await AxiosInstance.get("orders/");
+        setOrders(resp.data);
+      } catch (err) {
+        console.error("Błąd podczas pobierania zamówień:", err);
+        setErrorOrders("Nie udało się pobrać zamówień. Spróbuj później.");
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    fetchOrders();
+  }, [activeTab]);
+
+  // ——— Obsługa ładowania / błędów ———
   if (loadingUser) {
     return (
       <Section className="container relative">
@@ -73,7 +88,6 @@ const MyAccount = () => {
       </Section>
     );
   }
-
   if (errorUser) {
     return (
       <Section className="container relative">
@@ -81,7 +95,6 @@ const MyAccount = () => {
       </Section>
     );
   }
-
   if (!userData) {
     return (
       <Section className="container relative">
@@ -92,7 +105,7 @@ const MyAccount = () => {
     );
   }
 
-  // --- 4) Główny UI ---
+  // ——— Główny UI ———
   return (
     <Section className="container relative">
       <Heading className="mb-6 text-3xl text-center" title="Moje konto" />
@@ -102,7 +115,7 @@ const MyAccount = () => {
           overflow-hidden rounded-2xl border-2 border-n-1 bg-n-8
         "
       >
-        {/* LEWY PANEL: Menu */}
+        {/* ====== LEWY PANEL: Menu ====== */}
         <nav className="flex h-full w-48 flex-col border-r-2 border-n-3 bg-n-9">
           {my_acc_menu.map((item) => (
             <button
@@ -129,9 +142,9 @@ const MyAccount = () => {
           ))}
         </nav>
 
-        {/* PRAWY PANEL: Treść */}
+        {/* ====== PRAWY PANEL: Treść ====== */}
         <div className="flex-grow p-6 overflow-y-auto">
-          {/* —————— Zakładka “Twoje dane” —————— */}
+          {/* — Zakładka “Twoje dane” — */}
           {activeTab === "dane" && (
             <div>
               <h4 className="h4 font-semibold mb-4">Twoje dane</h4>
@@ -166,7 +179,7 @@ const MyAccount = () => {
             </div>
           )}
 
-          {/* —————— Zakładka “Membership” —————— */}
+          {/* — Zakładka “Membership” — */}
           {activeTab === "my_membership" && (
             <div>
               <h4 className="h4 font-semibold mb-4">Membership</h4>
@@ -175,13 +188,11 @@ const MyAccount = () => {
               {loadingMemberships && (
                 <div className="py-4">Ładowanie karnetów...</div>
               )}
-
               {/* Błąd */}
               {errorMemberships && (
                 <div className="text-red-500 py-4">{errorMemberships}</div>
               )}
-
-              {/* Gdy nie ma karnetów */}
+              {/* Brak karnetów */}
               {!loadingMemberships &&
                 !errorMemberships &&
                 memberships.length === 0 && (
@@ -189,7 +200,6 @@ const MyAccount = () => {
                     Nie masz żadnych aktywnych karnetów.
                   </div>
                 )}
-
               {/* Lista karnetów */}
               {!loadingMemberships &&
                 !errorMemberships &&
@@ -198,7 +208,7 @@ const MyAccount = () => {
                     {memberships.map((m) => (
                       <div
                         key={m.id}
-                        className="mb-6 rounded-lg border border-n-6 bg-n-9 p-4 "
+                        className="mb-6 rounded-lg border border-n-6 bg-n-9 p-4"
                       >
                         <p>
                           <span className="font-medium">Typ karnetu:</span>{" "}
@@ -216,8 +226,6 @@ const MyAccount = () => {
                           <span className="font-medium">Aktywny do:</span>{" "}
                           {m.active_to}
                         </p>
-
-                        {/* Jeśli są cechy, wyświetlamy listę */}
                         {m.membership_type_details.features.length > 0 && (
                           <ul className="mt-2 list-disc pl-5 text-sm">
                             {m.membership_type_details.features.map((f) => (
@@ -232,13 +240,120 @@ const MyAccount = () => {
             </div>
           )}
 
-          {/* —————— Zakładka “Activity” —————— */}
+          {/* — Zakładka „Activity” — */}
           {activeTab === "activity" && (
             <div>
               <h4 className="h4 font-semibold mb-4">Activity</h4>
               <p>
                 Brak danych do wyświetlenia (jeszcze w trakcie implementacji).
               </p>
+            </div>
+          )}
+
+          {/* — Zakładka “Moje zamówienia” — */}
+          {activeTab === "my_orders" && (
+            <div>
+              <h4 className="h4 font-semibold mb-4">Moje zamówienia</h4>
+
+              {/* Loader */}
+              {loadingOrders && <div className="py-4">Ładowanie zamówień…</div>}
+
+              {/* Błąd */}
+              {errorOrders && (
+                <div className="text-red-500 py-4">{errorOrders}</div>
+              )}
+
+              {/* Lista zamówień (pomijamy te ze status === "cart") */}
+              {!loadingOrders &&
+                !errorOrders &&
+                orders.filter((o) => o.status !== "cart").length === 0 && (
+                  <div className="text-center py-4 text-n-3">
+                    Nie masz jeszcze żadnych zamówień.
+                  </div>
+                )}
+
+              {!loadingOrders &&
+                !errorOrders &&
+                orders
+                  .filter((o) => o.status !== "cart")
+                  .map((order) => {
+                    // W zamówieniu interesuje nas obiekt `order.basket`
+                    const basket = order.basket || {
+                      items: [],
+                      grand_total: 0,
+                    };
+                    const grandTotal = parseFloat(basket.grand_total || 0);
+
+                    return (
+                      <div
+                        key={order.id}
+                        className="mb-6 rounded-lg border border-n-6 bg-n-9 p-4"
+                      >
+                        <p>
+                          <span className="font-medium">ID zamówienia:</span>{" "}
+                          {order.id}
+                        </p>
+                        <p>
+                          <span className="font-medium">Data:</span>{" "}
+                          {order.date}
+                        </p>
+                        <p>
+                          <span className="font-medium">Status:</span>{" "}
+                          {order.status}
+                        </p>
+
+                        {/* Lista pozycji w koszyku */}
+                        {basket.items && basket.items.length > 0 && (
+                          <ul className="mt-2 space-y-2">
+                            {basket.items.map((item) => {
+                              const lineTotal = parseFloat(
+                                item.total_price || 0,
+                              );
+                              const unitPrice = parseFloat(
+                                item.product.price || 0,
+                              );
+                              return (
+                                <li
+                                  key={item.id}
+                                  className="flex justify-between items-center border-b pb-2"
+                                >
+                                  <div>
+                                    <p className="font-medium">
+                                      {item.product.name}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      Cena jedn.:{" "}
+                                      {Number.isNaN(unitPrice)
+                                        ? "0"
+                                        : unitPrice.toLocaleString(
+                                            "pl-PL",
+                                          )}{" "}
+                                      zł × Ilość: {item.quantity}
+                                    </p>
+                                  </div>
+                                  <div className="text-right font-medium">
+                                    {Number.isNaN(lineTotal)
+                                      ? "0"
+                                      : lineTotal.toLocaleString("pl-PL")}{" "}
+                                    zł
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+
+                        {/* Łączna kwota zamówienia */}
+                        <div className="mt-4 text-right font-bold text-lg">
+                          Łączna kwota:
+                          {Number.isNaN(grandTotal)
+                            ? "0"
+                            : grandTotal.toLocaleString("pl-PL")}{" "}
+                          zł
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
           )}
         </div>
