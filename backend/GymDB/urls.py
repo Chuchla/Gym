@@ -2,11 +2,8 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from GymUs.views import (
-    RegisterViewSet, ArticlesViewSet, EventViewSet,
-    MembershipTypeViewSet, MembershipViewSet, PurchaseMembershipView, ProductViewSet, CartDetailView, CartItemsView,
-    CheckoutCartView, CartItemDetailModifyView
-)
+from GymUs.views import *
+
 from GymUs.admin import custom_admin_site
 
 router = routers.DefaultRouter()

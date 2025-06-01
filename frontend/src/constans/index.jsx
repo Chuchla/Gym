@@ -46,7 +46,7 @@ export const loggedInNavigation = [
   {
     id: "1",
     title: "Shop",
-    url: "/#shop",
+    url: "/shop",
   },
   {
     id: "2",

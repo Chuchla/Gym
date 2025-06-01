@@ -14,7 +14,6 @@ from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import MembershipFilter
 
-
 User = get_user_model()
 
 
@@ -267,6 +266,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     GET /api/products/ - lista produktów
     GET /api/products/{id}/ - szczegóły produktu
     """
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.AllowAny]
@@ -424,7 +424,6 @@ class CheckoutCartView(APIView):
             active_order.status = 'pending_payment'
             active_order.date = timezone.now().date()
             active_order.save()
-
 
         serializer = CartOrderSerializer(active_order, context={'request': request})  # Zwróć sfinalizowane zamówienie
         return Response(serializer.data, status=status.HTTP_200_OK)

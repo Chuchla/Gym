@@ -51,7 +51,8 @@ const MyAccount = () => {
       setLoadingMemberships(true);
       try {
         // Znów: upewniamy się, że slash jest na końcu
-        const resp = await AxiosInstance.get("my-memberships/");
+        const today = new Date().toISOString().slice(0, 10);
+        const resp = await AxiosInstance.get(`my-memberships/?status=active`);
         setMemberships(resp.data);
       } catch (err) {
         console.error("Błąd podczas pobierania karnetów:", err);
