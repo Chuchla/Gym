@@ -227,3 +227,62 @@ class PurchaseMembershipSerializer(serializers.Serializer):
             status='active'
         )
         return membership
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'description', 'price']
+
+class BasketItemProductDetailsSerializer(serializers.ModelSerializer): # Do wyświetlania w BasketItem
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'price')
+
+class BasketItemSerializer(serializers.ModelSerializer):
+    product = BasketItemProductDetailsSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), source='product', write_only=True
+    )
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BasketItem
+        fields = ['id', 'product_id', 'product', 'quantity', 'total_price']
+        read_only_fields = ['id', 'product', 'total_price']
+
+    def get_total_price(self, obj):
+        return obj.product.price * obj.quantity
+
+class BasketSerializer(serializers.ModelSerializer):
+    items = BasketItemSerializer(many=True, read_only=True)
+    grand_total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Basket
+        fields = ['id', 'items', 'grand_total']
+        read_only_fields = ['id', 'items', 'grand_total']
+
+    def get_grand_total(self, obj):
+        return sum(item.product.price * item.quantity for item in obj.items.all())
+
+class CartOrderSerializer(serializers.ModelSerializer):
+    client_email = serializers.EmailField(source='client.email', read_only=True)
+    basket = BasketSerializer(read_only=True)
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'client_email', 'price', 'date', 'status', 'basket']
+        read_only_fields = ['id', 'client_email', 'price', 'date', 'basket']
+
+
+class CartItemAddSerializer(serializers.Serializer):
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    quantity = serializers.IntegerField(min_value=1, default=1)
+
+    def validate_product_id(self, value):
+        return value
+
+class CartItemUpdateSerializer(serializers.Serializer):
+    quantity = serializers.IntegerField(min_value=0)

@@ -5,10 +5,15 @@ from .serializers import *
 from .models import *
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from django.http import Http404
+
+
+User = get_user_model()
 
 
 class RegisterViewSet(viewsets.ViewSet):
@@ -217,7 +222,7 @@ class MembershipViewSet(viewsets.mixins.ListModelMixin,
         return Membership.objects.filter(client=self.request.user).order_by('-purchase_date')
 
 
-class PurchaseMembershipView(viewsets.ViewSet): # Lub użyj generics.CreateAPIView
+class PurchaseMembershipView(viewsets.ViewSet):
     """
     API endpoint do zakupu karnetu.
     POST /api/purchase-membership/ - zakup karnetu
@@ -235,3 +240,172 @@ class PurchaseMembershipView(viewsets.ViewSet): # Lub użyj generics.CreateAPIVi
             response_serializer = MembershipSerializer(client_membership, context={'request': request})
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProductViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint do przeglądania dostępnych produktów (planów treningowych).
+    GET /api/products/ - lista produktów
+    GET /api/products/{id}/ - szczegóły produktu
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+def get_or_create_active_cart_order_for_user(user_client):  # Zmieniona nazwa dla jasności
+    """Pobiera lub tworzy aktywny koszyk (Order ze statusem 'cart') dla użytkownika."""
+    active_order, created = Order.objects.get_or_create(
+        client=user_client,
+        status='cart',
+        defaults={
+            'date': timezone.now().date(),
+            'price': 0.00
+        }
+    )
+    if created or not hasattr(active_order, 'basket') or active_order.basket is None:
+        Basket.objects.get_or_create(order=active_order)
+        active_order.refresh_from_db()
+    return active_order
+
+
+def recalculate_order_price(order_instance):
+    """Przelicza i zapisuje całkowitą cenę zamówienia na podstawie jego koszyka."""
+    if hasattr(order_instance, 'basket') and order_instance.basket is not None:
+        total = sum(item.product.price * item.quantity for item in order_instance.basket.items.all())
+        if order_instance.price != total:
+            order_instance.price = total
+            order_instance.save(update_fields=['price'])
+
+
+class CartDetailView(APIView):
+    """
+    API endpoint do zarządzania koszykiem użytkownika.
+    GET /api/cart/ - Zwraca aktualny koszyk użytkownika.
+    POST /api/cart/items/ - Dodaje produkt do koszyka lub aktualizuje jego ilość. (Przeniesione do CartItemsView)
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """GET /api/cart/ - Zwraca aktualny koszyk użytkownika."""
+        active_order = get_or_create_active_cart_order_for_user(request.user)
+        serializer = CartOrderSerializer(active_order, context={'request': request})
+        return Response(serializer.data)
+
+
+class CartItemsView(APIView):
+    """
+    API endpoint do dodawania pozycji do koszyka.
+    POST /api/cart/items/ - Dodaje produkt do koszyka.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        """Dodaje produkt do koszyka lub zwiększa jego ilość."""
+        active_order = get_or_create_active_cart_order_for_user(request.user)
+        input_serializer = CartItemAddSerializer(data=request.data)
+
+        if input_serializer.is_valid():
+            product_to_add = input_serializer.validated_data['product_id']
+            quantity_to_add = input_serializer.validated_data['quantity']
+
+            basket_instance = active_order.basket
+
+            cart_item, created = BasketItem.objects.get_or_create(
+                basket=basket_instance,
+                product=product_to_add,
+                defaults={'quantity': 0}
+            )
+
+            cart_item.quantity += quantity_to_add
+
+            if cart_item.quantity <= 0:
+                cart_item.delete()
+            else:
+                cart_item.save()
+
+            recalculate_order_price(active_order)
+            output_serializer = CartOrderSerializer(active_order, context={'request': request})
+            return Response(output_serializer.data, status=status.HTTP_200_OK)
+        return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CartItemDetailModifyView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_cart_item_instance(self, user_client, item_id):  # Zmieniona nazwa metody z get_cart_item
+        active_order = get_or_create_active_cart_order_for_user(user_client)  # Używamy poprawionej nazwy funkcji
+        if not hasattr(active_order, 'basket') or active_order.basket is None:
+            # Ten import byłby potrzebny, jeśli byś go tu używał: from django.http import Http404
+            raise Http404("Koszyk nie istnieje dla tego zamówienia.")
+        return get_object_or_404(BasketItem, id=item_id, basket=active_order.basket)
+
+    def put(self, request, item_id):  # item_id pochodzi z URL
+        """Aktualizuje ilość produktu w koszyku."""
+        cart_item = self.get_cart_item_instance(request.user, item_id)
+        # Pobierz instancję Order PRZED potencjalnym usunięciem cart_item, aby uniknąć problemów z referencją
+        order_instance = cart_item.basket.order
+
+        input_serializer = CartItemUpdateSerializer(data=request.data)
+
+        if input_serializer.is_valid():
+            new_quantity = input_serializer.validated_data['quantity']
+
+            # --- Dodaj logowanie do debugowania ---
+            print(f"DEBUG: Aktualizacja CartItem ID: {cart_item.id}, żądana nowa ilość: {new_quantity}")
+
+            if new_quantity <= 0:
+                print(f"DEBUG: Ilość <= 0, próba usunięcia CartItem ID: {cart_item.id}")
+                cart_item.delete()
+                print(f"DEBUG: CartItem ID: {cart_item.id} powinien zostać usunięty.")
+            else:
+                cart_item.quantity = new_quantity
+                cart_item.save()
+                print(f"DEBUG: CartItem ID: {cart_item.id} zaktualizowano ilość na: {cart_item.quantity}")
+
+            recalculate_order_price(order_instance)  # Przelicz sumę używając zapisanej instancji Order
+            print(f"DEBUG: Przeliczono cenę dla Order ID: {order_instance.id}, nowa cena: {order_instance.price}")
+
+            output_serializer = CartOrderSerializer(order_instance,
+                                                    context={'request': request})  # Zwróć zaktualizowany Order
+            return Response(output_serializer.data, status=status.HTTP_200_OK)
+
+        print(f"DEBUG: Błędy walidacji serializera: {input_serializer.errors}")  # Logowanie błędów walidacji
+        return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, item_id):  # item_id pochodzi z URL
+        """Usuwa produkt z koszyka."""
+        cart_item = self.get_cart_item_instance(request.user, item_id)
+        order_instance = cart_item.basket.order  # Pobierz Order zanim usuniesz item
+        cart_item.delete()
+        recalculate_order_price(order_instance)  # Przelicz sumę
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CheckoutCartView(APIView):
+    """
+    API endpoint do "złożenia zamówienia" (zmiany statusu koszyka na zamówienie).
+    POST /api/cart/checkout/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        active_order = get_or_create_active_cart_order_for_user(request.user)
+
+        if not hasattr(active_order, 'basket') or active_order.basket is None or not active_order.basket.items.exists():
+            return Response({"error": "Koszyk jest pusty. Nie można złożyć zamówienia."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            recalculate_order_price(active_order)
+            if active_order.price <= 0:
+                return Response({"error": "Wartość zamówienia musi być większa niż zero."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            active_order.status = 'pending_payment'
+            active_order.date = timezone.now().date()
+            active_order.save()
+
+
+        serializer = CartOrderSerializer(active_order, context={'request': request})  # Zwróć sfinalizowane zamówienie
+        return Response(serializer.data, status=status.HTTP_200_OK)

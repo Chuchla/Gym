@@ -115,20 +115,11 @@ class MembershipType(models.Model):
 
 
 class Membership(models.Model):
-    #    active_from = models.DateField()
-    #    active_to = models.DateField()
-    #    type = models.CharField(max_length=255)
-    #    status = models.CharField(max_length=255)
-    #    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='memberships')
-    #
-    #    def __str__(self):
-    #        return f"Membership {self.type} ({self.status})"
-
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='memberships')
     membership_type = models.ForeignKey(MembershipType, on_delete=models.PROTECT, related_name='instances', null=True)
     purchase_date = models.DateTimeField(default=timezone.now, editable=False)
     active_from = models.DateField()
-    active_to = models.DateField()
+    active_to = models.DateField(null=True, blank=True)
 
     STATUS_CHOICES = [
         ('pending_payment', 'Oczekuje na płatność'),
@@ -198,19 +189,28 @@ class BasketItem(models.Model):
 
 class Order(models.Model):
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name='orders')
-    price = models.FloatField()
-    date = models.DateField()
-    status = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0.0)])
+    date = models.DateField(default=timezone.now)
+
+    STATUS_CHOICES = [
+        ('cart', 'W koszyku'),
+        ('pending_payment', 'Oczekuje na płatność'),
+        ('processing', 'W trakcie realizacji'),
+        ('completed', 'Zakończone'),
+        ('cancelled', 'Anulowane'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='cart')
 
     def __str__(self):
-        return f"Order {self.id} ({self.status})"
+        client_info = self.client.email if self.client else 'Gość (brak klienta)'
+        return f"Order {self.id} ({client_info}) - Status: {self.get_status_display()}"
 
 
 class Payment(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='payments')
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments')
     date = models.DateField()
-    charge = models.FloatField()
+    charge = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
     status = models.CharField(max_length=255)
 
     def __str__(self):
