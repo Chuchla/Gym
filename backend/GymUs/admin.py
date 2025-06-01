@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
 from django.template.response import TemplateResponse
+from django.utils.html import format_html
+from django.urls import reverse
 
 from .models import *
 
@@ -79,6 +81,75 @@ class MembershipTypeAdmin(admin.ModelAdmin):
 class FeatureAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     search_fields = ('name',)
+
+
+class BasketItemInline(admin.TabularInline):
+    model = BasketItem
+    fields = ('product', 'quantity', 'get_item_price', 'get_total_item_price') # Dodajemy metody do wyświetlania cen
+    readonly_fields = ('get_item_price', 'get_total_item_price')
+    extra = 0
+
+    def get_item_price(self, obj):
+        if obj.product:
+            return obj.product.price
+        return "N/A"
+    get_item_price.short_description = 'Cena jednostkowa'
+
+    def get_total_item_price(self, obj):
+        if obj.product and obj.quantity is not None:
+            return obj.product.price * obj.quantity
+        return "N/A"
+    get_total_item_price.short_description = 'Cena całkowita pozycji'
+
+
+class BasketInline(admin.StackedInline):
+    model = Basket
+    inlines = [BasketItemInline]
+    can_delete = False
+    verbose_name_plural = 'Koszyk przypisany do tego zamówienia'
+
+
+@admin.register(Order, site=custom_admin_site)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_client_email', 'date', 'status', 'price', 'view_items_count')
+    list_filter = ('status', 'date', 'client')
+    search_fields = ('id', 'client__email', 'client__first_name', 'client__last_name')
+    list_editable = ('status',)
+    readonly_fields = ('price', 'date', 'client_link')
+    date_hierarchy = 'date'
+
+    inlines = [BasketInline]
+
+    fieldsets = (
+        (None, {
+            'fields': ('client_link', 'status', 'date', 'price')
+        }),
+    )
+
+    def get_client_email(self, obj):
+        if obj.client:
+            return obj.client.email
+        return "Brak klienta (gość)"
+    get_client_email.short_description = 'Email Klienta'
+    get_client_email.admin_order_field = 'client__email'
+
+    def client_link(self, obj):
+        if obj.client:
+            link = reverse("admin:GymUs_client_change", args=[obj.client.id])
+            return format_html('<a href="{}">{}</a>', link, obj.client.email)
+        return "Brak klienta"
+    client_link.short_description = 'Klient'
+
+    def view_items_count(self, obj):
+        if hasattr(obj, 'basket') and obj.basket:
+            return obj.basket.items.count()
+        return 0
+    view_items_count.short_description = 'Liczba pozycji'
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.status in ['completed', 'cancelled']:
+            return self.readonly_fields + ('status',)
+        return self.readonly_fields
 
 
 custom_admin_site.register(Article, ArticleAdmin)
