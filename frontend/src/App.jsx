@@ -16,6 +16,7 @@ import CalendarOfEvents from "./components/CalendarOfEvents.jsx";
 import Event from "./components/Event.jsx";
 import MyAccount from "./components/MyAccount.jsx";
 import Shop from "./components/Shop.jsx";
+import CertainProduct from "./components/CertainProduct.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -52,6 +53,7 @@ const App = () => {
           <Route path={"/login"} element={<Login />} />
           <Route path={"/account"} element={<MyAccount />} />
           <Route path={"/shop"} element={<Shop />} />
+          <Route path={"/product/:id"} element={<CertainProduct />} />
         </Routes>
         <Routes>
           <Route path={"/articles"} element={<Articles />} />
