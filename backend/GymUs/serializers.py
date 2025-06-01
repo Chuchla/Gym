@@ -144,3 +144,86 @@ class ClientRegistrationSerializer(serializers.ModelSerializer):
         # make_password zahashuje hasło zgodnie z ustawieniami Django
         validated_data['password'] = make_password(validated_data['password'])
         return super().create(validated_data)
+
+
+class FeatureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feature
+        fields = ['id', 'name']
+
+
+class MembershipTypeSerializer(serializers.ModelSerializer):
+    features = FeatureSerializer(many=True, read_only=True)
+
+    feature_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Feature.objects.all(),
+        many=True,
+        write_only=True,
+        source='features'
+    )
+
+    class Meta:
+        model = MembershipType
+        fields = fields = [
+            'id',
+            'name',
+            'description',
+            'price',
+            'duration_days',
+            'features',  # do odczytu
+            'feature_ids',  # do zapisu
+        ]
+
+
+class MembershipSerializer(serializers.ModelSerializer):
+    membership_type_details = MembershipTypeSerializer(source='membership_type', read_only=True)
+    client_email = serializers.EmailField(source='client.email', read_only=True)
+
+    class Meta:
+        model = Membership
+        fields = [
+            'id',
+            'client',
+            'client_email',
+            'membership_type',
+            'membership_type_details',
+            'purchase_date',
+            'active_from',
+            'active_to',
+            'status'
+        ]
+        read_only_fields = ['purchase_date', 'active_to', 'client_email', 'membership_type_details']
+        extra_kwargs = {
+            'client': {'write_only': True, 'required': False},
+            'membership_type': {'write_only': True}
+        }
+
+
+class PurchaseMembershipSerializer(serializers.Serializer):
+    membership_type_id = serializers.IntegerField()
+    active_from_date = serializers.DateField(required=False, help_text="Data aktywacji, domyślnie dzisiaj.")
+
+    def validate_membership_type_id(self, value):
+        try:
+            membership_type = MembershipType.objects.get(id=value)
+
+        except MembershipType.DoesNotExist:
+            raise serializers.ValidationError("Wybrany typ karnetu nie istnieje.")
+        return value
+
+    def create(self, validated_data):
+        client = self.context['request'].user
+        membership_type_id = validated_data['membership_type_id']
+        membership_type = MembershipType.objects.get(id=membership_type_id)
+
+        active_from = timezone.now().date()
+        active_to = active_from + timedelta(days=membership_type.duration_days)
+
+        membership = Membership.objects.create(
+            client=client,
+            membership_type=membership_type,
+            active_from=active_from,
+            active_to=active_to,
+            status='active'
+        )
+        return membership

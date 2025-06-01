@@ -1,7 +1,11 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+
 
 class ClientUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -87,17 +91,62 @@ class Activities(models.Model):
         return f"Activity {self.id} on {self.date}"
 
 
-class Membership(models.Model):
-    active_from = models.DateField()
-    active_to = models.DateField()
-    type = models.CharField(max_length=255)
-    status = models.CharField(max_length=255)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='memberships')
+class Feature(models.Model):
+    """
+    TO MA SLUZYC JAKO FEATURE DO KARNETU
+    """
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return f"Membership {self.type} ({self.status})"
+        return self.name
 
 
+class MembershipType(models.Model):
+    name = models.CharField(max_length=100, unique=True, help_text="Np. Karnet Miesięczny OPEN")
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.0)])
+    duration_days = models.IntegerField(help_text="Czas trwania karnetu w dniach", validators=[MinValueValidator(1)])
+
+    features = models.ManyToManyField(Feature, related_name='membership_types', blank=True,
+                                      help_text="Cechy, które będą wyświetlane w karcie tego typu karnetu")
+
+    def __str__(self):
+        return f"{self.name} ({self.price} PLN, {self.duration_days} dni)"
+
+
+class Membership(models.Model):
+    #    active_from = models.DateField()
+    #    active_to = models.DateField()
+    #    type = models.CharField(max_length=255)
+    #    status = models.CharField(max_length=255)
+    #    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='memberships')
+    #
+    #    def __str__(self):
+    #        return f"Membership {self.type} ({self.status})"
+
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='memberships')
+    membership_type = models.ForeignKey(MembershipType, on_delete=models.PROTECT, related_name='instances', null=True)
+    purchase_date = models.DateTimeField(default=timezone.now, editable=False)
+    active_from = models.DateField()
+    active_to = models.DateField(null=True, blank=True)
+
+    STATUS_CHOICES = [
+        ('pending_payment', 'Oczekuje na płatność'),
+        ('active', 'Aktywny'),
+        ('expired', 'Wygasły'),
+        ('cancelled', 'Anulowany'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending_payment')
+
+    def __str__(self):
+        if self.membership_type:
+            return f"Karnet {self.membership_type.name} dla {self.client.email} (od {self.active_from} do {self.active_to})"
+        return f"Karnet (bez typu) dla {self.client.email} (od {self.active_from} do {self.active_to})"
+
+    def save(self, *args, **kwargs):
+        if self.active_from and self.membership_type and not self.active_to:
+            self.active_to = self.active_from + timedelta(days=self.membership_type.duration_days)
+        super().save(*args, **kwargs)
 
 
 class Event(models.Model):
@@ -114,9 +163,9 @@ class Event(models.Model):
     )
     place = models.CharField(max_length=255)
     is_personal_training = models.BooleanField(default=False)
+
     def __str__(self):
         return self.name
-
 
 
 class Reservation(models.Model):
