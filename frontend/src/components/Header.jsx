@@ -58,7 +58,6 @@ const Header = () => {
                   handleClick();
                   if (item.title === "LogOut") {
                     logout();
-                    navigate("/");
                   } else if (item.title === "My account") {
                     navigate("/account");
                   }

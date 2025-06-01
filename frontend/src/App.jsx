@@ -14,6 +14,7 @@ import Articles from "./components/Articles.jsx";
 import CertainArticle from "./components/CertainArticle.jsx";
 import CalendarOfEvents from "./components/CalendarOfEvents.jsx";
 import Event from "./components/Event.jsx";
+import MyAccount from "./components/MyAccount.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/trainer/trainerPanel" element={<TrainerPanel />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path={"/login"} element={<Login />} />
+          <Route path={"/account"} element={<MyAccount />} />
         </Routes>
         <Routes>
           <Route path={"/articles"} element={<Articles />} />
