@@ -11,7 +11,7 @@ const ArticleModal = ({ isOpen, onClose }) => {
     content: "",
   });
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,12 +28,12 @@ const ArticleModal = ({ isOpen, onClose }) => {
         },
       });
 
-      alert("Artykuł został dodany!");
+      alert("Article has been added!");
       setFormData({ title: "", content: "" });
       onClose();
     } catch (err) {
-      console.error("Błąd dodawania artykułu:", err);
-      alert("Nie udało się dodać artykułu.");
+      console.error("Error adding article:", err);
+      alert("Failed to add the article.");
     }
   };
 
@@ -42,11 +42,11 @@ const ArticleModal = ({ isOpen, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <h2>Dodaj artykuł</h2>
+        <h2>Add Article</h2>
         <form onSubmit={handleSubmit}>
           <input
             name="title"
-            placeholder="Tytuł"
+            placeholder="Title"
             value={formData.title}
             onChange={handleChange}
             required
@@ -54,7 +54,7 @@ const ArticleModal = ({ isOpen, onClose }) => {
 
           <textarea
             name="content"
-            placeholder="Treść"
+            placeholder="Content"
             value={formData.content}
             onChange={handleChange}
             className="article-textarea"
@@ -62,9 +62,9 @@ const ArticleModal = ({ isOpen, onClose }) => {
           />
 
           <div className="modal-buttons">
-            <button type="submit">Dodaj</button>
+            <button type="submit">Add</button>
             <button type="button" onClick={onClose}>
-              Anuluj
+              Cancel
             </button>
           </div>
         </form>

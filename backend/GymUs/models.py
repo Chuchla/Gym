@@ -218,12 +218,10 @@ class Payment(models.Model):
 
 
 class Message(models.Model):
-    sender_id = models.IntegerField()
-    receiver_id = models.IntegerField()
+    sender = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='received_messages')
     content = models.CharField(max_length=255)
-    date = models.DateField()
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='messages')
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='messages')
+    date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Message {self.id} on {self.date}"
+        return f"Message from {self.sender} to {self.receiver} on {self.date.strftime('%Y-%m-%d %H:%M')}"
