@@ -324,7 +324,7 @@ export const classes = [
     description: "Daj się porwać do tańca gorącym, latynowskim rytmom!",
     photoUrl: "./src/assets/zumba.jpg",
     backgroundPhoto: "",
-    intensity: 2,
+    intensity: 3,
     time: "55",
   },
   {
@@ -344,7 +344,7 @@ export const classes = [
       "Rozruszaj całe ciało. Poprawiaj wydolnośc i modeluj sylwetkę.",
     photoUrl: "./src/assets/trening_funkcjonalny.jpg",
     backgroundPhoto: "",
-    intensity: 2,
+    intensity: 4,
     time: "55",
   },
 ];

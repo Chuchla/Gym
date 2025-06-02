@@ -4,8 +4,8 @@ import { useParams } from "react-router-dom";
 import AxiosInstance from "./AxiosInstance.jsx";
 import Section from "./Section.jsx";
 import Heading from "./Heading.jsx";
-import { curve } from "../assets/index.js";
 import Button from "./Button.jsx";
+import { isLoggedIn } from "../Utils/Auth.jsx";
 
 const Event = () => {
   const { id } = useParams();
@@ -14,11 +14,13 @@ const Event = () => {
   const [error, setError] = useState(null);
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn());
 
   const fetchEvent = async () => {
     try {
       const resp = await AxiosInstance.get(`events/${id}`);
       setEvent(resp.data);
+      console.log(resp.data);
     } catch (err) {
       console.error("Blad podczas ladowania wydarzenia: ", err);
       setError("Nie udało się załadować wydarzenia.");
@@ -34,6 +36,7 @@ const Event = () => {
     try {
       const resp = await AxiosInstance.post(`events/${id}/reserve/`);
       setEvent(resp.data);
+      console.log(resp.data);
     } catch (err) {
       console.error("Blad podczas rezerwacji: ", err.response || err);
       if (err.response && err.response.data && err.response.data.detail) {
@@ -48,6 +51,10 @@ const Event = () => {
   useEffect(() => {
     fetchEvent();
   }, [id]);
+
+  useEffect(() => {
+    setLoggedIn(isLoggedIn());
+  }, []);
 
   if (loading) return <p>Ładowanie artykułu...</p>;
   if (error) return <p className={"text-red-500"}>{error}</p>;
@@ -76,7 +83,14 @@ const Event = () => {
 
         {event.remaining_spots > 0 ? (
           <Button
-            onClick={handleReserve}
+            onClick={
+              loggedIn
+                ? handleReserve
+                : () =>
+                    setReserveError(
+                      "By zapisać się na zajęcia musisz być zalogowany",
+                    )
+            }
             disabled={reserving}
             className={reserving ? "opacity-50 cursos-not allowed" : ""}
             white={reserving}

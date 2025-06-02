@@ -1,3 +1,4 @@
+from django.template.defaulttags import querystring
 from rest_framework.decorators import api_view, action
 from GymDB import settings
 from rest_framework import viewsets, permissions, status
@@ -55,12 +56,14 @@ class EventViewSet(viewsets.ModelViewSet):
     PUT    /api/events/{pk}/    → update
     DELETE /api/events/{pk}/    → destroy
     POST   /api/events/{pk}/reserve/    → zapisanie się na wydarzenie
+    GET    /api/events/my/      → lista wydarzeń, na które użytkownik jest zapisany
+    GET    /api/events/own      → lista wydarzeń, które prowadzi trener
     """
     queryset = Event.objects.all().order_by('date', 'time')
     serializer_class = EventSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrived']:
+        if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         elif self.action == 'reserve':
             return [permissions.IsAuthenticated()]
@@ -110,6 +113,41 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(event)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='my',
+        url_name='my_events'
+    )
+    def my_events(self, request):
+        """
+        GET /api/events/my/
+        """
+        user = request.user
+
+        queryset = Event.objects.filter(reservations__client=user).order_by('date', 'time').distinct()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, permission_classes=[permissions.IsAuthenticated], url_path='own', url_name='own_events')
+    def own_events(self, request):
+        """
+        GET /api/events/own/
+        """
+        user = request.user
+        queryset = Event.objects.filter(trainer=user).order_by('date', 'time')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ClientViewSet(viewsets.ModelViewSet):
     """
@@ -125,7 +163,7 @@ class ClientViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
-    @action(detail=False, methods=["get"], url_path="me")
+    @action(detail=False, methods=["get"], url_path="me", permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)

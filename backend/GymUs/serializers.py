@@ -22,6 +22,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    is_trainer = serializers.SerializerMethodField()
+
     class Meta:
         model = Client
         fields = [
@@ -32,8 +34,14 @@ class ClientSerializer(serializers.ModelSerializer):
             'phone_number',
             'date_joined',
             'role',
+            'is_staff',
+            'is_superuser',
+            'is_trainer'
         ]
-        read_only_fields = ['id', 'date_joined', 'role']
+        read_only_fields = ['id', 'date_joined', 'role', 'is_staff', 'is_superuser', 'is_trainer']
+
+    def get_is_trainer(self, obj):
+        return obj.role == 'Trainer' or obj.is_staff
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -243,10 +251,12 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'name', 'description', 'price']
 
-class BasketItemProductDetailsSerializer(serializers.ModelSerializer): # Do wyświetlania w BasketItem
+
+class BasketItemProductDetailsSerializer(serializers.ModelSerializer):  # Do wyświetlania w BasketItem
     class Meta:
         model = Product
         fields = ('id', 'name', 'price')
+
 
 class BasketItemSerializer(serializers.ModelSerializer):
     product = BasketItemProductDetailsSerializer(read_only=True)
@@ -263,6 +273,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
     def get_total_price(self, obj):
         return obj.product.price * obj.quantity
 
+
 class BasketSerializer(serializers.ModelSerializer):
     items = BasketItemSerializer(many=True, read_only=True)
     grand_total = serializers.SerializerMethodField()
@@ -274,6 +285,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     def get_grand_total(self, obj):
         return sum(item.product.price * item.quantity for item in obj.items.all())
+
 
 class CartOrderSerializer(serializers.ModelSerializer):
     client_email = serializers.EmailField(source='client.email', read_only=True)
@@ -292,6 +304,7 @@ class CartItemAddSerializer(serializers.Serializer):
 
     def validate_product_id(self, value):
         return value
+
 
 class CartItemUpdateSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=0)

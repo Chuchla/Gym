@@ -7,3 +7,7 @@ export function logout() {
   localStorage.removeItem("refreshToken");
   window.location.href = "/";
 }
+
+export function isTrainer(userData) {
+  return userData?.is_trainer === true;
+}
