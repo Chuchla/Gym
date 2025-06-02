@@ -19,6 +19,8 @@ import Shop from "./components/Shop.jsx";
 import CertainProduct from "./components/CertainProduct.jsx";
 import MyBasket from "./components/MyBasket.jsx";
 import YourClasses from "./components/YourClasses.jsx";
+import ChatList from "./components/ChatList.jsx";
+import Chat from "./components/Chat.jsx";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -57,21 +59,15 @@ const App = () => {
           <Route path={"/shop"} element={<Shop />} />
           <Route path={"/shop/mybasket/"} element={<MyBasket />} />
           <Route path={"/product/:id"} element={<CertainProduct />} />
+          <Route path="/messages" element={<ChatList />} />
+          <Route path="/messages/:userId" element={<Chat />} />
         </Routes>
         <Routes>
           <Route path={"/articles"} element={<Articles />} />
           <Route path={"/articles/:id"} element={<CertainArticle />} />
         </Routes>
         <Routes>
-          <Route
-            path={"/calendar"}
-            element={
-              <>
-                <YourClasses />
-                <CalendarOfEvents />
-              </>
-            }
-          />
+          <Route path={"/calendar"} element={<CalendarOfEvents />} />
         </Routes>
         <Routes>
           <Route path={"/events/:id"} element={<Event />} />
