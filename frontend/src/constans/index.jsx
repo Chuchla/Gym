@@ -35,6 +35,9 @@ import {
   twitter,
   yourlogo,
   sztanga_gradient,
+  defaultImageSource,
+  geminiRobot,
+  geminiRobotBackground,
 } from "../assets";
 
 export const loggedInNavigation = [

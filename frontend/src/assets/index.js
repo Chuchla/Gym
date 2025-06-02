@@ -77,7 +77,14 @@ import instagram from "./socials/instagram.svg";
 import telegram from "./socials/telegram.svg";
 import twitter from "./socials/twitter.svg";
 
+import defaultImageSource from "./1.jpg";
+import geminiRobot from "./Gemini_robot.jpeg";
+import geminiRobotBackground from "./Gemini_robot_background.jpeg";
+
 export {
+  geminiRobotBackground,
+  geminiRobot,
+  defaultImageSource,
   sztanga_gradient,
   gymUsLogo,
   brainwave,

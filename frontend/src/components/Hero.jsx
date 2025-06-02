@@ -1,6 +1,13 @@
 import React from "react";
 import Section from "./Section.jsx";
-import { curve, heroBackground, robot } from "../assets/index.js";
+import {
+  background,
+  curve,
+  geminiRobot,
+  geminiRobotBackground,
+  heroBackground,
+  robot,
+} from "../assets/index.js";
 import Button from "./Button.jsx";
 import { BottomLine } from "./design/Hero.jsx";
 import Generating from "./Generating.jsx";
@@ -34,12 +41,11 @@ const Hero = () => {
             </span>
           </h1>
           <p className={"body-1 max-w-3xl mx-auto mb-6 text-n-2 lg:mb-8"}>
-            Lorem ipsum dolor sit amet consectetur adipiscing elit. Consectetur
-            adipiscing elit quisque faucibus ex sapien vitae. Ex sapien vitae
-            pellentesque sem placerat in id. Placerat in id cursus mi pretium
-            tellus duis. Pretium tellus duis convallis tempus leo eu aenean.
+            Odkryj przyszłość fitnessu w GymUs! Łączymy najnowocześniejszą
+            technologię AI ze spersonalizowanym podejściem do treningu, aby
+            pomóc Ci osiągnąć Twoje cele.
           </p>
-          <Button href={"/pricing"} white>
+          <Button href={"/#memberships"} white>
             Start now!
           </Button>
         </div>
@@ -49,16 +55,16 @@ const Hero = () => {
               <div className={"h-[0.9rem] bg-n-10 rounded-t-[0.9rem]"} />
               <div
                 className={
-                  "aspect-[33/40] rounded-b-[0.9rem] overflow-hidden md:aspect-[688/490] lg:aspect-[1024/490]"
+                  "aspect-[33/45] rounded-b-[0.9rem] overflow-hidden md:aspect-[688/550] lg:aspect-[688/550]"
                 }
               >
                 <img
-                  src={robot}
+                  src={geminiRobot}
                   className={
-                    "w-full scale-[1.7] translate-y-[8%] md:scale-[1] md:-translate-y-[10%] lg:-translate-y-[23%]"
+                    "w-full scale-[1.7] translate-y-[20%] md:scale-[1] md:-translate-y-[5%] lg:-translate-y-[10%]"
                   }
                   width={1024}
-                  height={490}
+                  height={600}
                   alt={"AI"}
                 />
               </div>
@@ -66,7 +72,7 @@ const Hero = () => {
           </div>
           <div
             className={
-              "absolute -top-[54%] left-1/2 w-[234%] -translate-x-1/2 md:-top-[46%] md:w-[138%] lg:-top-[104%]"
+              "absolute -top-[54%] left-1/2 w-[234%] -translate-x-1/2 md:-top-[46%] md:w-[138%] lg:-top-[104%] z-0"
             }
           >
             <img
