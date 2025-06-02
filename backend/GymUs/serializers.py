@@ -86,8 +86,16 @@ class EventSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def create(self, validated_data):
-        trainer = self.context['request'].user
-        event = Event.objects.create(trainer=trainer, **validated_data)
+        client_ids = validated_data.pop('client_ids', [])
+        event = Event.objects.create(**validated_data)
+
+        for client_id in client_ids:
+            try:
+                client = Client.objects.get(id=client_id)
+                Reservation.objects.create(client=client, event=event, date=event.date)
+            except Client.DoesNotExist:
+                continue
+
         return event
 
 
@@ -310,3 +318,57 @@ class CartItemAddSerializer(serializers.Serializer):
 
 class CartItemUpdateSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=0)
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'sender', 'receiver', 'text', 'timestamp']
+
+
+class RecurringEventSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField(required=False, allow_blank=True)
+    time = serializers.TimeField()
+    place = serializers.CharField()
+    capacity = serializers.IntegerField()
+    is_personal_training = serializers.BooleanField(default=False)
+    is_recurring = serializers.BooleanField(default=True)
+    day_of_week = serializers.CharField()
+    start_repeat = serializers.DateField()
+    end_repeat = serializers.DateField()
+    client_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
+
+    def create(self, validated_data):
+        from datetime import timedelta
+        import calendar
+
+        trainer = self.context['request'].user
+
+        client_ids = validated_data.pop('client_ids', [])
+        day_of_week = validated_data.pop('day_of_week')
+        start_date = validated_data.pop('start_repeat')
+        end_date = validated_data.pop('end_repeat')
+        validated_data.pop('is_recurring', None)
+
+        weekday_index = list(calendar.day_name).index(day_of_week.capitalize())
+
+        current = start_date
+        created_events = []
+
+        while current <= end_date:
+            if current.weekday() == weekday_index:
+                event = Event.objects.create(
+                    trainer=trainer,
+                    date=current,
+                    **validated_data
+                )
+                for client_id in client_ids:
+                    try:
+                        client = Client.objects.get(id=client_id)
+                        Reservation.objects.create(client=client, event=event, date=current)
+                    except Client.DoesNotExist:
+                        continue
+                created_events.append(event)
+            current += timedelta(days=1)
+
+        return created_events

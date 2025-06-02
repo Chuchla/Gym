@@ -44,7 +44,7 @@ export const loggedInNavigation = [
   {
     id: "0",
     title: "Messages",
-    url: "/#messages",
+    url: "/messages",
   },
   {
     id: "1",
