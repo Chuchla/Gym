@@ -46,27 +46,27 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     trainer_name = serializers.ReadOnlyField(source='trainer.username')
-
     reserved_count = serializers.SerializerMethodField(read_only=True)
     remaining_spots = serializers.SerializerMethodField(read_only=True)
-
-    client_ids = serializers.PrimaryKeyRelatedField(
-        source='reservation_set',
-        read_only=True,
-        many=True
-    )
+    client_ids = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = [
             'id', 'name', 'description', 'date', 'time',
             'capacity', 'place', 'is_personal_training',
-            'trainer', 'trainer_name', 'reserved_count', 'remaining_spots', 'client_ids'
+            'trainer',
+            'trainer_name',
+            'reserved_count',
+            'remaining_spots',
+            'client_ids',
+            'participants'
         ]
-        read_only_fields = ['trainer', 'trainer_name',
-                            'reserved_count',
-                            'remaining_spots',
-                            'client_ids', ]
+        read_only_fields = [
+            'trainer', 'trainer_name', 'reserved_count',
+            'remaining_spots', 'client_ids', 'participants'
+        ]
 
     def get_reserved_count(self, obj):
         return obj.reservations.count()
@@ -74,18 +74,20 @@ class EventSerializer(serializers.ModelSerializer):
     def get_remaining_spots(self, obj):
         return max(obj.capacity - obj.reservations.count(), 0)
 
+    def get_client_ids(self, obj):
+        # Ta metoda dostarcza listę ID klientów dla pola client_ids
+        return list(obj.reservations.values_list('client_id', flat=True))
+
+    def get_participants(self, obj):
+        # Ta metoda dostarcza pełne dane uczestników dla pola participants
+        reservations = Reservation.objects.filter(event=obj).select_related('client')
+        clients = [reservation.client for reservation in reservations]
+        serializer = ClientSerializer(clients, many=True)  # Używamy Twojego ClientSerializer
+        return serializer.data
+
     def create(self, validated_data):
-        client_ids = validated_data.pop('client_ids', [])
         trainer = self.context['request'].user
         event = Event.objects.create(trainer=trainer, **validated_data)
-
-        for client_id in client_ids:
-            try:
-                client = Client.objects.get(id=client_id)
-                Reservation.objects.create(client=client, event=event, date=event.date)
-            except Client.DoesNotExist:
-                continue
-
         return event
 
 
