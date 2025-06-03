@@ -110,7 +110,6 @@ const CertainArticle = () => {
             </p>
           </header>
           <article
-            // Używamy prose, ale możemy nadpisać niektóre style dla lepszego dopasowania
             className="
               prose prose-invert
               prose-p:text-n-2 prose-p:leading-relaxed prose-p:text-justify
@@ -118,12 +117,9 @@ const CertainArticle = () => {
               max-w-none
               text-base md:text-lg
               break-words whitespace-pre-line
+              text-justify
             "
-            // max-w-none jest potrzebne, aby nadpisać max-width z .prose, jeśli kontener .max-w-3xl ma zarządzać szerokością
           >
-            {/* Rozdzielanie na akapity na podstawie podwójnych nowych linii.
-                Jeśli content jest już HTML, użyj dangerouslySetInnerHTML (ostrożnie!).
-                Jeśli to czysty tekst, to mapowanie jest OK. */}
             {article.content.split("\n\n").map((paragraph, index) => (
               <p key={index} className="mb-4 md:mb-5 last:mb-0">
                 {paragraph}

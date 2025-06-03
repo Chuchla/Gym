@@ -3,16 +3,24 @@ import React, { useEffect, useState } from "react";
 import { parseISO, isBefore, isAfter, subHours, format } from "date-fns"; // isAfter nie było używane, usunąłem
 import Section from "./Section.jsx";
 import Heading from "./Heading.jsx";
-import AxiosInstance from "./AxiosInstance.jsx"; // Założenie: AxiosInstance jest poprawnie skonfigurowany
+import AxiosInstance from "./AxiosInstance.jsx";
+import { isLoggedIn } from "../Utils/Auth.jsx"; // Założenie: AxiosInstance jest poprawnie skonfigurowany
 
 const YourClasses = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [error, setError] = useState(null);
   const [isTrainer, setIsTrainer] = useState(false);
-
+  const [loggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
     const fetchClasses = async () => {
+      const loggedInStatus = isLoggedIn();
+      if (!loggedInStatus) {
+        setLoggedIn(false);
+        setLoading(false);
+        return;
+      }
+      setLoggedIn(loggedInStatus);
       try {
         const userResp = await AxiosInstance.get("clients/me/");
         const user = userResp.data;
@@ -83,7 +91,10 @@ const YourClasses = () => {
     : "Lista zajęć, na które jesteś zapisany/a";
 
   return (
-    <Section customPaddings className="py-8 sm:py-10 lg:py-12 z-10">
+    <Section
+      customPaddings
+      className="py-8 sm:py-10 lg:py-12 z-10 items-center "
+    >
       {" "}
       {/* Dodane z-10 jeśli jest pod spodem coś z wyższym z-index */}
       <Heading
@@ -92,13 +103,15 @@ const YourClasses = () => {
         className="text-2xl sm:text-3xl mb-8 sm:mb-12" // Dopasowanie rozmiaru i marginesu
       />
       {upcomingOrRecent.length === 0 ? (
-        <div className="text-center py-10 px-6 rounded-lg bg-n-7 border border-n-6 shadow-md">
+        <div className="text-center py-10 px-6 rounded-lg bg-n-7 border border-n-6 shadow-md mx-auto max-w-2xl">
           <p className="text-n-3 text-lg">
             {" "}
             {/* Zwiększony tekst */}
-            {isTrainer
-              ? "Nie masz żadnych prowadzonych zajęć w ciągu ostatnich 24h ani w przyszłości."
-              : "Nie masz żadnych zajęć w ciągu ostatnich 24h ani w przyszłości."}
+            {loggedIn
+              ? isTrainer
+                ? "Nie masz żadnych prowadzonych zajęć w ciągu ostatnich 24h ani w przyszłości."
+                : "Nie masz żadnych zajęć w ciągu ostatnich 24h ani w przyszłości."
+              : "By wyświetlić swoje zajęcia musisz być zalogowany."}
           </p>
         </div>
       ) : (
@@ -122,7 +135,7 @@ const YourClasses = () => {
               <li
                 key={e.id}
                 className={`
-                  w-full max-w-3xl mx-auto p-5 sm:p-6 rounded-xl border border-n-5 
+                  w-full max-w-2xl mx-auto p-5 sm:p-6 rounded-xl border border-n-5 
                   ${cardBgColor} 
                   ${textColor} 
                   shadow-lg transition-all duration-300 ease-in-out transform hover:scale-[1.02] mb-4

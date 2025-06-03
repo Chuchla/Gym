@@ -75,7 +75,7 @@ export const loggedInNavigation = [
   {
     id: "6",
     title: "My account",
-    url: "/#myacc",
+    url: "/account",
     onlyMobile: true,
   },
 ];

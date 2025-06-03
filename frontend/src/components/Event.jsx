@@ -192,8 +192,8 @@ const Event = () => {
                   onClick={handleReserve}
                   disabled={reserving || !loggedIn}
                   className={`
-                    w-full md:w-auto px-8 py-3 text-lg
-                    ${!loggedIn && "opacity-50 cursor-not-allowed !bg-n-5 !text-n-3 border-n-5"}
+                    w-full md:w-auto px-8 py-3 text-md
+                    ${!loggedIn && "opacity-50 cursor-not-allowed !bg-n-8 !text-n-3 border-n-5"}
                     ${reserving && "opacity-50 cursor-not-allowed"}
                   `}
                 >
