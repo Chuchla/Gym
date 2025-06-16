@@ -24,6 +24,7 @@ User = get_user_model()
 from rest_framework.views import APIView
 from pusher import Pusher
 
+
 class RegisterViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = User.objects.all()
@@ -45,6 +46,7 @@ pusher = Pusher(
     cluster="eu",
     ssl=True
 )
+
 
 class ArticlesViewSet(viewsets.ModelViewSet):
     """
@@ -173,7 +175,7 @@ class ClientViewSet(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
 
     def get_permissions(self):
-        if self.action == "me":
+        if self.action == "me" or self.action == "list":
             return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
@@ -285,6 +287,7 @@ def get_messages(request, id):
     ).order_by('date')
     data = [{"sender": msg.sender_id, "text": msg.content} for msg in messages]
     return Response(data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
