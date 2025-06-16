@@ -77,46 +77,70 @@ const PersonalTrainingModal = ({ isOpen, onClose }) => {
     setSelectedClients((prev) => prev.filter((c) => c.id !== id));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const payload = {
-      name: formData.name || "Personal Training",
-      description: formData.goals,
-      time: formData.time,
-      place: "To be determined",
-      capacity: selectedClients.length || 1,
-      is_personal_training: true,
-      client_ids: selectedClients.map((c) => c.id),
-    };
-
-    if (eventType === "single") {
-      payload.date = formData.date;
-    } else {
-      payload.day_of_week = formData.day_of_week;
-      payload.start_repeat = formData.start_repeat;
-      payload.end_repeat = formData.end_repeat;
-      payload.is_recurring = true;
-    }
-
-    try {
-      const endpoint =
-        eventType === "recurring"
-          ? `${API_URL}/api/events-recurring/`
-          : `${API_URL}/api/events/`;
-
-      await axios.post(endpoint, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      alert("Personal training has been scheduled!");
-      onClose();
-      window.location.reload();
-    } catch (err) {
-      console.error("Error adding training:", err);
-      alert("Failed to schedule personal training.");
-    }
+  const payload = {
+    name: formData.name || "Personal Training",
+    description: formData.goals,
+    time: formData.time,
+    place: "To be determined",
+    capacity: selectedClients.length || 1,
+    is_personal_training: true,
+    client_ids: selectedClients.map((c) => c.id),
   };
+
+  if (eventType === "single") {
+    payload.date = formData.date;
+  } else {
+    payload.day_of_week = formData.day_of_week;
+    payload.start_repeat = formData.start_repeat;
+    payload.end_repeat = formData.end_repeat;
+    payload.is_recurring = true;
+  }
+
+  try {
+    const endpoint =
+      eventType === "recurring"
+        ? `${API_URL}/api/events-recurring/`
+        : `${API_URL}/api/events/`;
+
+    const response = await axios.post(endpoint, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const eventId = response.data.id;
+
+    // automatyczne zapisy dla klientów
+    if (eventType === "single" && eventId && selectedClients.length > 0) {
+      for (const client of selectedClients) {
+        try {
+          await axios.post(
+            `${API_URL}/api/events/${eventId}/reserve-for/`,
+            { user_id: client.id },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } catch (err) {
+          console.warn(
+            `Failed to reserve ${client.first_name} ${client.last_name}:`,
+            err.response?.data || err.message
+          );
+        }
+      }
+    }
+
+    alert("Personal training has been scheduled!");
+    onClose();
+    window.location.reload();
+  } catch (err) {
+    console.error("Error adding training:", err);
+    alert("Failed to schedule personal training.");
+  }
+};
+
+
 
   if (!isOpen) return null;
 

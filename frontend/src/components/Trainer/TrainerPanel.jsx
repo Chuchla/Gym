@@ -161,6 +161,7 @@ const TrainerClasses = () => {
         )}
       </div>
 
+      {/* Modals */}
       <EventModal
         isOpen={showEventModal}
         onClose={() => setShowEventModal(false)}
@@ -173,10 +174,12 @@ const TrainerClasses = () => {
         isOpen={showArticleModal}
         onClose={() => setShowArticleModal(false)}
       />
-      <EventPreviewModal
-        event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-      />
+      {selectedEvent && (
+        <EventPreviewModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
     </div>
   );
 };

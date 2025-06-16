@@ -82,6 +82,58 @@
   resize: vertical;
   min-height: 80px;
 }
+.previewTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.previewField {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  color: #eee;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #333;
+}
+
+.previewField strong {
+  font-weight: 600;
+  color: #ccc;
+  min-width: 130px;
+  text-align: right;
+}
+
+.previewValue {
+  flex: 1;
+  word-break: break-word;
+  text-align: left;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modalButtons button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modalButtons button:hover {
+  background-color: #666;
+}
 
 
 .event-type-toggle button {

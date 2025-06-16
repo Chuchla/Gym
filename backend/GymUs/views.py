@@ -164,6 +164,47 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+        url_path='reserve-for',
+        url_name='reserve_for'
+    )
+    def reserve_for(self, request, pk=None):
+        """
+        POST /api/events/{pk}/reserve-for/
+        {
+            "user_id": 123
+        }
+        """
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response({"detail": "Missing user_id."}, status=400)
+
+        try:
+            event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
+            return Response({"detail": "Event not found."}, status=404)
+
+        try:
+            client = Client.objects.get(pk=user_id)
+        except Client.DoesNotExist:
+            return Response({"detail": "Client not found."}, status=404)
+
+        if Reservation.objects.filter(client=client, event=event).exists():
+            return Response({"detail": "Client is already reserved."}, status=400)
+
+        if event.reservations.count() >= event.capacity:
+            return Response({"detail": "No more spots."}, status=400)
+
+        Reservation.objects.create(
+            client=client,
+            event=event,
+            date=event.date
+        )
+        return Response({"detail": f"{client.first_name} {client.last_name} reserved."}, status=201)
+
 
 class ClientViewSet(viewsets.ModelViewSet):
     """
