@@ -4,7 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
-import "../trainer-styles/TrainerClasses.module.css";
+import styles from "../trainer-styles/TrainerClasses.module.css";
 import EventModal from "./EventModal";
 import PersonalTrainingModal from "./PersonalTrainingModal";
 import ArticleModal from "./ArticleModal";
@@ -60,7 +60,7 @@ const TrainerClasses = () => {
         const matchUser = ev.clients?.some((client) =>
           `${client.first_name} ${client.last_name}`
             .toLowerCase()
-            .includes(searchUser.toLowerCase()),
+            .includes(searchUser.toLowerCase())
         );
         return (
           (searchName ? matchName : true) && (searchUser ? matchUser : true)
@@ -70,25 +70,25 @@ const TrainerClasses = () => {
   };
 
   return (
-    <div className="trainer-classes">
-      <div className="calendar-header">
-        <h2 className="calendar-title">My Classes</h2>
-        <div className="button-group">
+    <div className={styles["trainer-classes"]}>
+      <div className={styles["calendar-header"]}>
+        <h2 className={styles["calendar-title"]}>My Classes</h2>
+        <div className={styles["button-group"]}>
           <button
             onClick={() => setShowEventModal(true)}
-            className="add-event-btn"
+            className={styles["add-event-btn"]}
           >
             Add Event
           </button>
           <button
             onClick={() => setShowPersonalModal(true)}
-            className="add-event-btn"
+            className={styles["add-event-btn"]}
           >
             Add Personal Training
           </button>
           <button
             onClick={() => setShowArticleModal(true)}
-            className="add-event-btn"
+            className={styles["add-event-btn"]}
           >
             Add Article
           </button>
@@ -109,37 +109,40 @@ const TrainerClasses = () => {
           hour12: false,
         }}
         height="auto"
+        contentHeight="auto"
+        className={styles.trainerCalendar}
       />
 
       {/* Search Panel */}
-      <div className="search-panel">
-        <h3>Search Events</h3>
-        <div className="search-fields">
+      <div className={styles["search-panel"]}>
+        <h3 style={{ textAlign: "left" }}>Search Events</h3>
+
+        <div className={styles["search-fields"]}>
           <input
             type="text"
             placeholder="Search by name..."
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
-            className="search-input"
+            className={styles["search-input"]}
           />
           <input
             type="text"
             placeholder="Search by client..."
             value={searchUser}
             onChange={(e) => setSearchUser(e.target.value)}
-            className="search-input"
+            className={styles["search-input"]}
           />
-          <button onClick={handleSearch} className="add-event-btn">
+          <button onClick={handleSearch} className={styles["add-event-btn"]}>
             Search
           </button>
         </div>
 
         {filteredList.length > 0 && (
-          <ul className="search-results-list">
+          <ul className={styles["search-results-list"]}>
             {filteredList.map((event) => (
               <li
                 key={event.id}
-                className="search-result-item"
+                className={styles["search-result-item"]}
                 onClick={() => setSelectedEvent(event)}
                 style={{ cursor: "pointer" }}
               >

@@ -1,23 +1,74 @@
-.article-textarea {
-    width: 100%;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 12px;
-    border-radius: 6px;
-    background-color: #333;
-    color: #fff;
-    border: 1px solid #555;
-    resize: vertical;
-    height: 300px;
+/* Tło modala */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
 }
 
-
+/* Kontener modala */
 .modal {
-    width: 600px;
-    max-width: 120%;
-    max-height: 160vh;
-    padding: 20px;
-    background-color: #1c1c1c;
-    border-radius: 8px;
-    overflow-y: auto;
+  width: 600px;
+  max-width: 90%;
+  max-height: 90vh;
+  padding: 20px;
+  background-color: #1c1c1c;
+  border-radius: 8px;
+  overflow-y: auto;
+  color: #fff;
+}
+
+/* Przyciskowy kontener */
+.modalButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* Pole tekstowe artykułu */
+.articleTextarea {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  resize: vertical;
+  height: 300px;
+}
+
+/* Pola formularza */
+.modal input {
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+/* Przycisk */
+.modalButtons button {
+  background-color: #444;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modalButtons button:hover {
+  background-color: #666;
 }

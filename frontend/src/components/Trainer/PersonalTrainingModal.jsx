@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../trainer-styles/EventModal.module.css";
+import styles from "../trainer-styles/EventModal.module.css";
 
 const API_URL = "http://localhost:8000";
 
@@ -24,21 +24,22 @@ const PersonalTrainingModal = ({ isOpen, onClose }) => {
   const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
-    if (!isOpen) {
-      setEventType("single");
-      setFormData({
-        name: "",
-        date: "",
-        time: "",
-        goals: "",
-        start_repeat: "",
-        end_repeat: "",
-        day_of_week: "",
-      });
-      setSelectedClients([]);
-      setSearchTerm("");
-      setSearchResults([]);
-    }
+    if (!isOpen) return;
+
+    // reset when modal opens
+    setEventType("single");
+    setFormData({
+      name: "",
+      date: "",
+      time: "",
+      goals: "",
+      start_repeat: "",
+      end_repeat: "",
+      day_of_week: "",
+    });
+    setSelectedClients([]);
+    setSearchTerm("");
+    setSearchResults([]);
   }, [isOpen]);
 
   useEffect(() => {
@@ -110,6 +111,7 @@ const PersonalTrainingModal = ({ isOpen, onClose }) => {
 
       alert("Personal training has been scheduled!");
       onClose();
+      window.location.reload();
     } catch (err) {
       console.error("Error adding training:", err);
       alert("Failed to schedule personal training.");
@@ -118,174 +120,160 @@ const PersonalTrainingModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h2>Schedule Personal Training</h2>
+ return (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modal}>
+      <h2>Schedule Personal Training</h2>
 
-        <div
-          className="event-type-toggle"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
+      <div className={styles.eventTypeToggle}>
+        <button
+          type="button"
+          className={eventType === "single" ? styles.selected : ""}
+          onClick={() => setEventType("single")}
         >
-          <button
-            type="button"
-            className={eventType === "single" ? "selected" : ""}
-            onClick={() => setEventType("single")}
-          >
-            One-time
-          </button>
-          <button
-            type="button"
-            className={eventType === "recurring" ? "selected" : ""}
-            onClick={() => setEventType("recurring")}
-          >
-            Recurring
-          </button>
+          One-time
+        </button>
+        <button
+          type="button"
+          className={eventType === "recurring" ? styles.selected : ""}
+          onClick={() => setEventType("recurring")}
+        >
+          Recurring
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className={styles.formGroup}>
+          <label>Training Name</label>
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Training Name</label>
+        {eventType === "single" ? (
+          <div className={styles.formGroup}>
+            <label>Date</label>
             <input
-              name="name"
-              value={formData.name}
+              type="date"
+              name="date"
+              value={formData.date}
               onChange={handleChange}
               required
             />
           </div>
-
-          {eventType === "single" ? (
-            <div className="form-group">
-              <label>Date</label>
+        ) : (
+          <>
+            <div className={styles.formGroup}>
+              <label>Day of the Week</label>
+              <select
+                name="day_of_week"
+                value={formData.day_of_week}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select a day --</option>
+                <option value="monday">Monday</option>
+                <option value="tuesday">Tuesday</option>
+                <option value="wednesday">Wednesday</option>
+                <option value="thursday">Thursday</option>
+                <option value="friday">Friday</option>
+                <option value="saturday">Saturday</option>
+                <option value="sunday">Sunday</option>
+              </select>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Start Date</label>
               <input
                 type="date"
-                name="date"
-                value={formData.date}
+                name="start_repeat"
+                value={formData.start_repeat}
                 onChange={handleChange}
                 required
               />
             </div>
-          ) : (
-            <>
-              <div className="form-group">
-                <label>Day of the Week</label>
-                <select
-                  name="day_of_week"
-                  value={formData.day_of_week}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">-- Select a day --</option>
-                  <option value="monday">Monday</option>
-                  <option value="tuesday">Tuesday</option>
-                  <option value="wednesday">Wednesday</option>
-                  <option value="thursday">Thursday</option>
-                  <option value="friday">Friday</option>
-                  <option value="saturday">Saturday</option>
-                  <option value="sunday">Sunday</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Start Date</label>
-                <input
-                  type="date"
-                  name="start_repeat"
-                  value={formData.start_repeat}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>End Date</label>
-                <input
-                  type="date"
-                  name="end_repeat"
-                  value={formData.end_repeat}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </>
-          )}
-
-          <div className="form-group">
-            <label>Time</label>
-            <input
-              type="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Training Goals</label>
-            <textarea
-              name="goals"
-              value={formData.goals}
-              onChange={handleChange}
-              rows={3}
-              style={{
-                width: "100%",
-                background: "#333",
-                color: "#fff",
-                borderRadius: "4px",
-                border: "1px solid #555",
-                padding: "8px",
-              }}
-            />
-          </div>
-
-          <div className="form-group" style={{ position: "relative" }}>
-            <label>Search for a Client</label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Enter name or email"
-            />
-
-            {searchResults.length > 0 && (
-              <ul className="search-results">
-                {searchResults.map((client) => (
-                  <li
-                    key={client.id}
-                    onClick={() => handleSelectClient(client)}
-                  >
-                    {client.first_name} {client.last_name} ({client.email})
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {selectedClients.length > 0 && (
-            <div className="selected-clients">
-              <p>Selected Clients:</p>
-              {selectedClients.map((c) => (
-                <span key={c.id} onClick={() => handleRemoveClient(c.id)}>
-                  {c.first_name} {c.last_name} ✕
-                </span>
-              ))}
+            <div className={styles.formGroup}>
+              <label>End Date</label>
+              <input
+                type="date"
+                name="end_repeat"
+                value={formData.end_repeat}
+                onChange={handleChange}
+                required
+              />
             </div>
-          )}
+          </>
+        )}
 
-          <div className="modal-buttons">
-            <button type="submit">Add</button>
-            <button type="button" onClick={onClose}>
-              Cancel
-            </button>
+        <div className={styles.formGroup}>
+          <label>Time</label>
+          <input
+            type="time"
+            name="time"
+            value={formData.time}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Training Goals</label>
+          <textarea
+            name="goals"
+            value={formData.goals}
+            onChange={handleChange}
+            rows={3}
+            className={styles.textarea}
+          />
+        </div>
+
+        <div className={styles.formGroup} style={{ position: "relative" }}>
+          <label>Search for a Client</label>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter name or email"
+          />
+
+          {searchResults.length > 0 && (
+            <ul className={styles.searchResults}>
+              {searchResults.map((client) => (
+                <li
+                  key={client.id}
+                  onClick={() => handleSelectClient(client)}
+                >
+                  {client.first_name} {client.last_name} ({client.email})
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {selectedClients.length > 0 && (
+          <div className={styles.selectedClients}>
+            <p>Selected Clients:</p>
+            {selectedClients.map((c) => (
+              <span key={c.id} onClick={() => handleRemoveClient(c.id)}>
+                {c.first_name} {c.last_name} ✕
+              </span>
+            ))}
           </div>
-        </form>
-      </div>
+        )}
+
+        <div className={styles.modalButtons}>
+          <button type="submit">Add</button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default PersonalTrainingModal;

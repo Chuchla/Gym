@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "../trainer-styles/EventModal.module.css";
+import styles from "../trainer-styles/EventModal.module.css";
 
 const API_URL = "http://localhost:8000";
 
@@ -83,29 +83,21 @@ const EventModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
+    <div className={styles.modalOverlay}>
+      <div className={styles.modal}>
         <h2>Add Event</h2>
 
-        <div
-          className="event-type-toggle"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
+        <div className={styles.eventTypeToggle}>
           <button
             type="button"
-            className={eventType === "single" ? "selected" : ""}
+            className={eventType === "single" ? styles.selected : ""}
             onClick={() => setEventType("single")}
           >
             Single
           </button>
           <button
             type="button"
-            className={eventType === "recurring" ? "selected" : ""}
+            className={eventType === "recurring" ? styles.selected : ""}
             onClick={() => setEventType("recurring")}
           >
             Recurring
@@ -113,7 +105,7 @@ const EventModal = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Name</label>
             <input
               name="name"
@@ -123,7 +115,7 @@ const EventModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Description</label>
             <input
               name="description"
@@ -133,7 +125,7 @@ const EventModal = ({ isOpen, onClose }) => {
           </div>
 
           {eventType === "single" ? (
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label>Date</label>
               <input
                 type="date"
@@ -145,7 +137,7 @@ const EventModal = ({ isOpen, onClose }) => {
             </div>
           ) : (
             <>
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label>Day of the Week</label>
                 <select
                   name="day_of_week"
@@ -164,7 +156,7 @@ const EventModal = ({ isOpen, onClose }) => {
                 </select>
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label>Start Date</label>
                 <input
                   type="date"
@@ -175,7 +167,7 @@ const EventModal = ({ isOpen, onClose }) => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label>End Date</label>
                 <input
                   type="date"
@@ -188,7 +180,7 @@ const EventModal = ({ isOpen, onClose }) => {
             </>
           )}
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Start Time</label>
             <input
               type="time"
@@ -199,7 +191,7 @@ const EventModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Location</label>
             <input
               name="place"
@@ -209,7 +201,7 @@ const EventModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Capacity</label>
             <input
               type="number"
@@ -220,7 +212,7 @@ const EventModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div className="modal-buttons">
+          <div className={styles.modalButtons}>
             <button type="submit">Add</button>
             <button type="button" onClick={handleClose}>
               Cancel
